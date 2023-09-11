@@ -1,8 +1,6 @@
 from aiogram.types import BotCommand
 
-dict_ = {
-    "start": "Приветсвие",
-}
+dict_ = {"start": "Приветсвие", "admin_panel": "Панель управления ботом"}
 
 
 async def set_default_commands(bot):

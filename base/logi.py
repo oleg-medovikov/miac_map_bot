@@ -8,5 +8,5 @@ t_logi = Table(
     Column("time", DateTime),
     Column("u_id", BigInteger),
     Column("action", SmallInteger),
-    Column("result", String),
+    Column("result", String, nullable=True),
 )

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from asyncpg.exceptions import DataError
+from sqlalchemy import and_
 
 from base import database, t_users
 
@@ -20,7 +21,7 @@ class User(BaseModel):
         if res is not None:
             return "Есть такой юзер"
         else:
-            query = t_users.insert().values(self.__dict__)
+            query = t_users.insert().values(self.model_dump())
             await database.execute(query)
 
     @staticmethod
@@ -31,6 +32,19 @@ class User(BaseModel):
 
         if res is None:
             raise ValueError("Неизвестный U_ID!")
+        else:
+            return User(**res)
+
+    @staticmethod
+    async def admin(U_ID: int) -> "User":
+        "Вытаскиваем пользователя по id с проверкой на админа"
+        query = t_users.select(
+            and_(t_users.c.u_id == int(U_ID), t_users.c.role == "admin")
+        )
+        res = await database.fetch_one(query)
+
+        if res is None:
+            raise ValueError("Вы не являетесь админом!")
 
         return User(**res)
 
