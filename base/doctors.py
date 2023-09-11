@@ -3,7 +3,7 @@ from .base import metadata
 from sqlalchemy import (
     Table,
     Column,
-    SmallInteger,
+    Integer,
     DateTime,
     String,
     BigInteger,
@@ -12,7 +12,7 @@ from sqlalchemy import (
 t_doctors = Table(
     "doctors",
     metadata,
-    Column("d_id", SmallInteger, primary_key=True),  # порядковый номер врача
+    Column("d_id", Integer, primary_key=True),  # порядковый номер врача
     Column("org", String),  # наименование организации из СЭМДа
     Column("fio", String),  # ФИО врача
     Column("snils", BigInteger),  # идентификатор врача
