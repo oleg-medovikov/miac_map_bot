@@ -1,11 +1,9 @@
 import conf
-import func
 import base
-import clas
+import models
 
 __all__ = [
     "conf",
-    "func",
     "base",
-    "clas",
+    'models',
 ]

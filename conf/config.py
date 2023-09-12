@@ -1,13 +1,26 @@
-from starlette.config import Config
+from os import getenv
+from dataclasses import dataclass
+from dotenv import load_dotenv
+from typing import Optional
 
-config = Config(".conf")
+load_dotenv(dotenv_path='.conf')
 
-TELEGRAM_TOKEN = config("BOT_API", cast=str)
-DATABASE_URL = config("DATABASE_URL", cast=str)
+@dataclass
+class Settings:
+    BOT_API: Optional[str]
+    DATABASE_URL: Optional[str]
+    REGIZ_AUTH: Optional[str]
+    REGIZ_URL: Optional[str]
+    REGIZ_TOKEN: Optional[str]
+    MASTER: Optional[str]
+    PROXY_URL: Optional[str]
 
-REGIZ_AUTH = config("REGIZ_AUTH", cast=str)
-REGIZ_URL = config("REGIZ_URL", cast=str)
-REGIZ_TOKEN = config("REGIZ_TOKEN", cast=str)
-
-MASTER = config("MASTER", cast=int)
-PROXY_URL = config("PROXY_URL", cast=str)
+settings = Settings(
+    BOT_API=getenv('BOT_API'),
+    DATABASE_URL=getenv('DATABASE_URL'),
+    REGIZ_AUTH=getenv('REGIZ_AUTH'),
+    REGIZ_URL=getenv('REGIZ_URL'),
+    REGIZ_TOKEN=getenv('REGIZ_TOKEN'),
+    MASTER=getenv('MASTER'),
+    PROXY_URL=getenv('PROXY_URL'),
+    )

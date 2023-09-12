@@ -6,26 +6,25 @@
 Автор: Медовиков Олег
 2023
 """
-
-import warnings
 import asyncio
 
-from disp import dp, bot, on_startup
-from shed import scheduler
-
-warnings.filterwarnings("ignore")
-
-
-async def main():
-    await asyncio.gather(
-        on_startup(dp, bot),
-        scheduler(),
-    )
+from base import db
+from disp import dp, bot
+from conf import settings
 
 
-if __name__ == "__main__":
-    while True:
-        try:
-            asyncio.run(main())
-        except KeyboardInterrupt:
-            break
+async def on_startup():
+    await db.set_bind(settings.DATABASE_URL)
+    await db.gino.create_all()
+    await dp.start_polling(bot)
+
+
+async def on_shutdown():
+    await db.pop_bind().close()
+
+
+if __name__ == '__main__':
+    try:
+        asyncio.run(on_startup())
+    except KeyboardInterrupt:
+        asyncio.run(on_shutdown())
