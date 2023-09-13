@@ -5,6 +5,9 @@ from .Log import Log
 from .Doctor import Doctor
 from .Token import Token
 from .Adress import Adress
+from .Work import Work
+from .Case import Case
+from .Diagnoz import Diagnoz
 
 __all__ = [
     "User",
@@ -14,4 +17,7 @@ __all__ = [
     "Doctor",
     "Token",
     "Adress",
+    "Work",
+    "Case",
+    "Diagnoz",
 ]
