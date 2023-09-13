@@ -1,5 +1,6 @@
 from aiogram.types import Message
 from aiogram.filters import Command
+from aiogram import md
 
 from .dispetcher import dp
 from models import User, Log
@@ -13,10 +14,10 @@ MESS = """*Доступные команды для редактирования
     *Выгрузка данных из нетрики*
     скопом выгрузить номера мед документов на 365 дней назад
     /get_cases_year
+    * начать выгрузку и обработку документов
+    /download_all_semd
 
-    """.replace(
-    "_", "\\_"
-)
+    """
 
 
 @dp.message(Command("admin_panel"))
@@ -32,5 +33,5 @@ async def admin_panel(message: Message):
     # ===============================
     await Log.create(u_id=message.chat.id, action=10)
     return await message.answer(
-        MESS, disable_notification=True, parse_mode="MarkdownV2"
+        md.quote(MESS), disable_notification=True, parse_mode="MarkdownV2"
     )

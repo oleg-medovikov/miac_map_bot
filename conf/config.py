@@ -11,6 +11,7 @@ class Settings:
     DATABASE_URL: str
     REGIZ_AUTH: str
     REGIZ_URL: str
+    REGIZ_URL_2: str
     REGIZ_TOKEN: str
     MASTER: str
     PROXY_URL: str
@@ -21,6 +22,7 @@ settings = Settings(
     DATABASE_URL=getenv("DATABASE_URL", default=""),
     REGIZ_AUTH=getenv("REGIZ_AUTH", default=""),
     REGIZ_URL=getenv("REGIZ_URL", default=""),
+    REGIZ_URL_2=getenv("REGIZ_URL_2", default=""),
     REGIZ_TOKEN=getenv("REGIZ_TOKEN", default=""),
     MASTER=getenv("MASTER", default=""),
     PROXY_URL=getenv("PROXY_URL", default=""),

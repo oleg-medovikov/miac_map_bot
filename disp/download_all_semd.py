@@ -1,10 +1,11 @@
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram import md
+from sqlalchemy import false
 
 
 from .dispetcher import dp
-from models import User, Log
+from models import User, Log, Meddoc
 from func import get_chat_fio, delete_message
 
 
@@ -19,10 +20,11 @@ async def download_all_semd(message: Message):
         mess = "У Вас недостаточно прав для этого действия!"
         return await message.answer(mess)
     # ===============================
+    DOCS = await Meddoc.query.where(Meddoc.processed == false()).gino.all()
 
-    MESS = "Всего не загруженных семдов на данный момент:"
+    MESS = f"Всего не загруженных семдов на данный момент: {len(DOCS)}"
 
-    # await Log.create(u_id=message.chat.id, action=12, result=MESS)
+    await Log.create(u_id=message.chat.id, action=12, result=MESS)
     return await message.answer(
         md.quote(MESS), disable_notification=True, parse_mode="MarkdownV2"
     )
