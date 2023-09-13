@@ -7,7 +7,7 @@ class Doctor(db.Model):
 
     d_id = db.Column(db.SmallInteger, primary_key=True)
     org = db.Column(db.String)
-    fio = db.Column(db.String(length=200))
-    telefon = db.Column(db.String(length=20))
+    fio = db.Column(db.String(200))
+    telefon = db.Column(db.String(20))
     spec = db.Column(db.String)
     date_update = db.Column(db.DateTime(), default=datetime.now())

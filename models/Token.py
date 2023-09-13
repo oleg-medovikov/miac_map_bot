@@ -6,6 +6,6 @@ class Token(db.Model):
     __tablename__ = "tokens"
 
     token = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String(leght=20))
+    name = db.Column(db.String(20))
     count = db.Column(db.Integer)
     date_update = db.Column(db.DateTime(), default=datetime.now())
