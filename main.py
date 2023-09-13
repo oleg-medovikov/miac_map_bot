@@ -23,7 +23,7 @@ async def on_shutdown():
     await db.pop_bind().close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         asyncio.run(on_startup())
     except KeyboardInterrupt:
