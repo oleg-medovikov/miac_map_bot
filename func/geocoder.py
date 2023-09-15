@@ -26,11 +26,11 @@ def find_values(id, json_repr):
 async def geocoder(ADR: str) -> dict:
     "Проверяем адрес с помощью геокодера яндекса"
 
-    token = await Token.query.where(func.min(Token.count)).gino.first()
+    token = await Token.query.order_by(Token.count).gino.first()
     if token is None:
         raise error("нет токена для геокодера!")
 
-    ADR = "санкт-петербург " + ADR
+    # ADR = "санкт-петербург " + ADR
     ADRESS = ADR.replace(" ", "+").replace("++", "")
     URL = (
         "https://geocode-maps.yandex.ru/1.x?format=json&lang=ru_RU"
@@ -43,7 +43,7 @@ async def geocoder(ADR: str) -> dict:
     req = requests.get(URL)
 
     if req.status_code != 200:
-        raise error("токен закончился")
+        raise error("токен закончился\n" + req.text)
 
     await token.update(count=token.count + 1).apply()
     DATA = req.text
@@ -73,5 +73,7 @@ async def geocoder(ADR: str) -> dict:
 
     if DICT["sity"] != "Санкт-Петербург":
         DICT["error"] = True
+    if DICT["point"] is not None:
+        DICT["point"] = [float(_) for _ in DICT["point"]["pos"].split(" ")]
 
     return DICT

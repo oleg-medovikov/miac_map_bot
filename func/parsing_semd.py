@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from sqlalchemy import and_
 
-from models import Meddoc, Doctor, Work, Case, Adress
+from models import Meddoc, Doctor, Work, Case, Adress, Diagnoz
 from conf import settings
 from .geocoder import geocoder
 
@@ -54,7 +54,7 @@ def analis_cda(soup: BeautifulSoup) -> dict:
         "date_diagnoz": "",
         "diagnoz": "",
         "MKB": "",
-        "lab_confirm ": "",
+        "lab_confirm": False,
     }
 
     # ===== поиск адреса регистрации ========
@@ -159,28 +159,28 @@ def analis_cda(soup: BeautifulSoup) -> dict:
 
         # Подтверждено лабораторно (да/нет)
         if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12160":
-            DICT["lab_confirm "] = return_attr(obs.find("value"), "value")
-            if DICT["lab_confirm "] in ["true", "True"]:
-                DICT["lab_confirm "] = True
+            DICT["lab_confirm"] = return_attr(obs.find("value"), "value")
+            if DICT["lab_confirm"] in ["true", "True"]:
+                DICT["lab_confirm"] = True
             else:
-                DICT["lab_confirm "] = False
+                DICT["lab_confirm"] = False
             continue
 
     return DICT
 
 
-async def parsing_semd(doc: Meddoc) -> str:
+async def parsing_semd(doc: Meddoc):
     "скачиваем и записваем в базу результат анализа"
     URL = (
         settings.REGIZ_URL_2
         + str(doc.meddoc_biz_key)
         + "?mimeTypeOriginal=true&_format=json&IsIgnoreFHIRcode=true"
     )
-    HEADER = dict(Authorization=settings.REGIZ_TOKEN)
+    HEADER = dict(Authorization=settings.REGIZ_AUTH)
 
     req = requests.get(URL, headers=HEADER)
     if req.status_code != 200:
-        raise error("проблема с подключением")
+        raise error("проблема с подключением\n" + URL)
 
     try:
         req.json()["entry"][0]["resource"]["content"]
@@ -206,22 +206,23 @@ async def parsing_semd(doc: Meddoc) -> str:
         raise error("не удалось проанализировать файлы")
 
     # ==== сначала пробуем получить доктора =====
-    doc = await Doctor.query.where(
-        and_(
-            Doctor.org == DICT["org"],
-            Doctor.fio == DICT["doc_fio"],
-            Doctor.telefon == DICT["doc_telefon"],
-            Doctor.spec == DICT["doc_spec"],
-        )
-    ).gino.first()
-    if doc is None:
-        doc = await Doctor.create(
+    doctor = (
+        await Doctor.query.where(Doctor.org == DICT["org"])
+        .where(Doctor.fio == DICT["doc_fio"])
+        .where(Doctor.telefon == DICT["doc_telefon"])
+        .where(Doctor.spec == DICT["doc_spec"])
+        .gino.first()
+    )
+    if doctor is None:
+        doctor = await Doctor.create(
             org=DICT["org"],
             fio=DICT["doc_fio"],
             telefon=DICT["doc_telefon"],
             spec=DICT["doc_spec"],
         )
     # ==== теперь получаем адрес регистрации ====
+    if DICT["adress_reg"] in (None, ""):
+        raise error("не найден адрес регистрации!")
     adr = await Adress.query.where(Adress.line == DICT["adress_reg"]).gino.first()
     if adr is None:
         ADR = await geocoder(DICT["adress_reg"])
@@ -233,3 +234,42 @@ async def parsing_semd(doc: Meddoc) -> str:
             street=ADR["street"],
             house=ADR["house"],
         )
+    # ==== получаем сведения о работе ====
+    if DICT["work_adress"] is not None:
+        work = await Work.query.where(Work.line == DICT["work_adress"]).gino.first()
+        if work is None:
+            WORK = await geocoder(DICT["work_adress"])
+            work = await Work.create(
+                line=DICT["work_adress"],
+                name=DICT["work_name"],
+                fias=DICT["work_adress_fias"],
+                point=WORK["point"],
+                text=WORK["text"],
+            )
+    else:
+        work = None
+    # ==== получаем диагноз =====
+    diag = (
+        await Diagnoz.query.where(Diagnoz.MKB == DICT["MKB"])
+        .where(Diagnoz.diagnoz == DICT["diagnoz"])
+        .gino.first()
+    )
+    if diag is None:
+        diag = await Diagnoz.create(MKB=DICT["MKB"], diagnoz=DICT["diagnoz"])
+    # === наконец-то пробуем сосздать сам случай извещения ===
+    await Case.create(
+        meddoc_biz_key=doc.meddoc_biz_key,
+        d_id=doctor.d_id,
+        a_id=adr.a_id,
+        date_sicness=DICT["date_sickness"],
+        date_first_req=DICT["date_first_req"],
+        hospitalization_type=int(DICT["hospitalization_type"])
+        if DICT["hospitalization_type"] is not None
+        else None,
+        primary_anti_epidemic_measures=DICT["primary_anti_epidemic_measures"],
+        time_SES=DICT["time_SES"],
+        w_id=work.w_id if work is not None else None,
+        date_diagnoz=DICT["date_diagnoz"],
+        di_id=diag.di_id,
+        lab_confirm=DICT["lab_confirm"],
+    )

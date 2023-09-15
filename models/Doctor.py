@@ -5,7 +5,7 @@ from datetime import datetime
 class Doctor(db.Model):
     __tablename__ = "doctors"
 
-    d_id = db.Column(db.SmallInteger, primary_key=True)
+    d_id = db.Column(db.SmallInteger, primary_key=True, autoincrement=True)
     org = db.Column(db.String)
     fio = db.Column(db.String(200))
     telefon = db.Column(db.String(20))

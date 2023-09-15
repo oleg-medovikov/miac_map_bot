@@ -3,6 +3,7 @@ from .delete_message import delete_message
 from .return_year import return_year
 from .get_meddoc_numbers import get_meddoc_numbers
 from .geocoder import geocoder
+from .parsing_semd import parsing_semd
 
 __all__ = [
     "get_chat_fio",
@@ -10,4 +11,5 @@ __all__ = [
     "return_year",
     "get_meddoc_numbers",
     "geocoder",
+    "parsing_semd",
 ]

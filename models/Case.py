@@ -17,5 +17,5 @@ class Case(db.Model):
     w_id = db.Column(db.Integer)
     date_diagnoz = db.Column(db.Date, nullable=True)
     di_id = db.Column(db.Integer)
-    lab_confim = db.Column(db.Boolean)
+    lab_confirm = db.Column(db.Boolean)
     date_update = db.Column(db.DateTime(), default=datetime.now())

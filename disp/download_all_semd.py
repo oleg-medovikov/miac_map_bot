@@ -1,12 +1,17 @@
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram import md
-from sqlalchemy import false
+from sqlalchemy import false, and_
+from asyncpg.exceptions import UniqueViolationError
 
 
 from .dispetcher import dp
 from models import User, Log, Meddoc
-from func import get_chat_fio, delete_message
+from func import get_chat_fio, delete_message, parsing_semd
+
+
+class error(Exception):
+    pass
 
 
 @dp.message(Command("download_all_semd"))
@@ -20,11 +25,30 @@ async def download_all_semd(message: Message):
         mess = "У Вас недостаточно прав для этого действия!"
         return await message.answer(mess)
     # ===============================
-    DOCS = await Meddoc.query.where(Meddoc.processed == false()).gino.all()
+    DOCS = await Meddoc.query.where(
+        and_(Meddoc.processed == false(), Meddoc.error == false())
+    ).gino.all()
 
     MESS = f"Всего не загруженных семдов на данный момент: {len(DOCS)}"
 
     await Log.create(u_id=message.chat.id, action=12, result=MESS)
-    return await message.answer(
+    await message.answer(
         md.quote(MESS), disable_notification=True, parse_mode="MarkdownV2"
     )
+    for doc in DOCS:
+        try:
+            await parsing_semd(doc)
+        except UniqueViolationError:
+            await doc.update(processed=True).apply()
+            continue
+        except error:
+            await doc.update(error=True).apply()
+        except Exception as e:
+            await doc.update(error=True).apply()
+            await message.answer(
+                md.quote(str(e) + f"\n {doc.meddoc_biz_key}"),
+                disable_notification=True,
+                parse_mode="MarkdownV2",
+            )
+        else:
+            await doc.update(processed=True).apply()
