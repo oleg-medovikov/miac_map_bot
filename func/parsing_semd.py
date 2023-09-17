@@ -95,9 +95,9 @@ def analis_cda(soup: BeautifulSoup) -> dict:
             if _.get("codeSystem") == "1.2.643.5.1.13.13.11.1002":
                 DICT["doc_spec"] = _.get("displayName")
         for _ in autor.find_all("id"):
-            print(_)
             if _.get("root") == "1.2.643.100.3":
-                DICT["doc_snils"] = _.get("extension")
+                STRING = _.get("extension")
+                DICT["doc_snils"] = int("".join(i for i in STRING if i.isdigit()))
 
     # ====== Разбираем показатели
     for obs in soup.find_all("observation"):
@@ -235,7 +235,7 @@ async def parsing_semd(doc: Meddoc):
             house=ADR["house"],
         )
     # ==== получаем сведения о работе ====
-    if DICT["work_adress"] is not None:
+    if DICT["work_adress"] not in (None, ""):
         work = await Work.query.where(Work.line == DICT["work_adress"]).gino.first()
         if work is None:
             WORK = await geocoder(DICT["work_adress"])
