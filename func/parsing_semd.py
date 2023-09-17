@@ -97,8 +97,10 @@ def analis_cda(soup: BeautifulSoup) -> dict:
         for _ in autor.find_all("id"):
             if _.get("root") == "1.2.643.100.3":
                 STRING = _.get("extension")
-                DICT["doc_snils"] = int("".join(i for i in STRING if i.isdigit()))
-
+                try:
+                    DICT["doc_snils"] = int("".join(i for i in STRING if i.isdigit()))
+                except TypeError:
+                    DICT["doc_snils"] = 0
     # ====== Разбираем показатели
     for obs in soup.find_all("observation"):
         CODE = obs.find("code")
