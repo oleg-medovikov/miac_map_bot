@@ -3,7 +3,7 @@ from base64 import b64decode
 from bs4 import BeautifulSoup
 from sqlalchemy import and_
 
-from models import Meddoc, Doctor, Work, Case, Adress, Diagnoz
+from models import Meddoc, Doctor, Work, Case, Adress, Diagnoz, CaseContent
 from conf import settings
 from .geocoder import geocoder
 from .analis_cda import analis_cda
@@ -48,6 +48,31 @@ async def parsing_semd(doc: Meddoc):
 
     if DICT == {}:
         raise error("не удалось проанализировать файлы")
+    # === анализируем, что удалось вытащить из файла
+    await CaseContent.create(
+        meddoc_biz_key=doc.meddoc_biz_key,
+        org_id=doc.org_id,
+        doc_fio=DICT.get("doc_fio") not in (None, ""),
+        doc_telefon=DICT.get("doc_telefon") not in (None, ""),
+        doc_spec=DICT.get("doc_spec") not in (None, ""),
+        doc_snils=DICT.get("doc_snils") not in (None, ""),
+        adress_reg=DICT.get("adress_reg") not in (None, ""),
+        adress_reg_fias=DICT.get("adress_reg_fias") not in (None, ""),
+        date_sickness=DICT.get("date_sickness") not in (None, ""),
+        date_first_req=DICT.get("date_first_req") not in (None, ""),
+        hospitalization_type=DICT.get("hospitalization_type") not in (None, ""),
+        primary_anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures")
+        not in (None, ""),
+        time_SES=DICT.get("time_SES") not in (None, ""),
+        work_adress=DICT.get("work_adress") not in (None, ""),
+        work_adress_fias=DICT.get("work_adress_fias") not in (None, ""),
+        work_name=DICT.get("work_name") not in (None, ""),
+        work_last_date=DICT.get("work_last_date") not in (None, ""),
+        date_diagnoz=DICT.get("") not in (None, ""),
+        diagnoz=DICT.get("") not in (None, ""),
+        MKB=DICT.get("") not in (None, ""),
+        lab_confirm=DICT.get("") not in (None, ""),
+    )
 
     # ==== сначала пробуем получить доктора =====
     doctor = (

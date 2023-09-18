@@ -7,6 +7,7 @@ from .Token import Token
 from .Adress import Adress
 from .Work import Work
 from .Case import Case
+from .CaseContent import CaseContent
 from .Diagnoz import Diagnoz
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "Work",
     "Case",
     "Diagnoz",
+    "CaseContent",
 ]
