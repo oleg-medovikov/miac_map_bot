@@ -23,28 +23,7 @@ def return_attr(some_dict, attr):
 
 def analis_cda(soup: BeautifulSoup) -> dict:
     "читаем и вытаскиваем данные"
-    DICT = {
-        "org": "",
-        "doc_fio": "doc_fio",
-        "doc_telefon": "",
-        "doc_spec": "",
-        "doc_snils": "",
-        "adress_reg": "",
-        "adress_reg_fias": "",
-        "date_sickness": "",
-        "date_first_req": "",
-        "hospitalization_type": 1,
-        "primary_anti_epidemic_measures": "",
-        "time_SES": "",
-        "work_adress": "",
-        "work_adress_fias": "",
-        "work_name": "",
-        "work_last_date": "",
-        "date_diagnoz": "",
-        "diagnoz": "",
-        "MKB": "",
-        "lab_confirm": False,
-    }
+    DICT = {}
 
     # ===== поиск адреса регистрации ========
     for addr in soup.find_all("addr"):
@@ -90,6 +69,33 @@ def analis_cda(soup: BeautifulSoup) -> dict:
                     DICT["doc_snils"] = int("".join(i for i in STRING if i.isdigit()))
                 except TypeError:
                     DICT["doc_snils"] = 0
+
+    # ==== разбираем даты ==========
+    # отдельный способ разбирать даты
+    for date in soup.find_all("effectiveTime"):
+        parents = date.find_previous_siblings()
+        print(date)
+        for parent in parents:
+            codeSystem = parent.get("codeSystem")
+            code = parent.get("code")
+            # ====== Дата заболевания ==========
+            if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12144":
+                DICT["date_sickness"] = return_attr(date, "value")
+                continue
+            # ==== Дата первичного обращения (выявления) ===
+            if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12145":
+                DICT["date_first_req"] = return_attr(date, "value")
+                continue
+            # Дата и час первичной сигнализации в СЭС
+            if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12149":
+                DICT["time_SES"] = return_attr(date, "value")
+                continue
+            # Диагноз
+            if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "838":
+                DICT["date_diagnoz"] = return_attr(date, "value")
+                print(DICT["date_diagnoz"], "diagnoz")
+                continue
+
     # ====== Разбираем показатели
     for obs in soup.find_all("observation"):
         CODE = obs.find("code")
