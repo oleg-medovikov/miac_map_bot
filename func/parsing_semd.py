@@ -49,6 +49,11 @@ async def parsing_semd(doc: Meddoc):
     if DICT == {}:
         raise error("не удалось проанализировать файлы")
     # === анализируем, что удалось вытащить из файла
+    content = await CaseContent.query.where(
+        CaseContent.meddoc_biz_key == doc.meddoc_biz_key
+    ).gino.first()
+    if content is not None:
+        await content.delete()
     await CaseContent.create(
         meddoc_biz_key=doc.meddoc_biz_key,
         org_id=doc.org_id,
@@ -63,7 +68,8 @@ async def parsing_semd(doc: Meddoc):
         hospitalization_type=DICT.get("hospitalization_type") not in (None, ""),
         primary_anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures")
         not in (None, ""),
-        time_SES=DICT.get("time_SES") not in (None, ""),
+        time_SES=not isinstance(DICT.get("time_SES"), str)
+        and DICT.get("time_SES") is not None,
         work_adress=DICT.get("work_adress") not in (None, ""),
         work_adress_fias=DICT.get("work_adress_fias") not in (None, ""),
         work_name=DICT.get("work_name") not in (None, ""),
@@ -75,19 +81,21 @@ async def parsing_semd(doc: Meddoc):
     )
 
     # ==== сначала пробуем получить доктора =====
-    doctor = (
-        await Doctor.query.where(Doctor.org == DICT["org"])
-        .where(Doctor.fio == DICT["doc_fio"])
-        .where(Doctor.telefon == DICT["doc_telefon"])
-        .where(Doctor.spec == DICT["doc_spec"])
-        .gino.first()
-    )
+    doctor = await Doctor.query.where(
+        and_(
+            Doctor.org == DICT.get("org"),
+            Doctor.fio == DICT.get("doc_fio"),
+            Doctor.telefon == DICT.get("doc_telefon"),
+            Doctor.spec == DICT.get("doc_spec"),
+        )
+    ).gino.first()
+
     if doctor is None:
         doctor = await Doctor.create(
-            org=DICT["org"],
-            fio=DICT["doc_fio"],
-            telefon=DICT["doc_telefon"],
-            spec=DICT["doc_spec"],
+            org=DICT.get("org"),
+            fio=DICT.get("doc_fio"),
+            telefon=DICT.get("doc_telefon"),
+            spec=DICT.get("doc_spec"),
         )
     # ==== теперь получаем адрес регистрации ====
     if DICT.get("adress_reg") in (None, ""):
@@ -97,7 +105,7 @@ async def parsing_semd(doc: Meddoc):
         ADR = await geocoder(DICT["adress_reg"])
         adr = await Adress.create(
             line=DICT["adress_reg"],
-            fias=DICT["adress_reg_fias"],
+            fias=DICT.get("adress_reg_fias"),
             point=ADR["point"],
             text=ADR["text"],
             street=ADR["street"],
@@ -135,7 +143,14 @@ async def parsing_semd(doc: Meddoc):
     )
     if diag is None:
         diag = await Diagnoz.create(MKB=DICT["MKB"], diagnoz=DICT["diagnoz"])
+
     # === наконец-то пробуем сосздать сам случай извещения ===
+    case = await Case.query.where(
+        Case.meddoc_biz_key == doc.meddoc_biz_key
+    ).gino.first()
+    if case is not None:
+        await case.delete()
+
     await Case.create(
         meddoc_biz_key=doc.meddoc_biz_key,
         d_id=doctor.d_id,
@@ -146,9 +161,11 @@ async def parsing_semd(doc: Meddoc):
         if DICT["hospitalization_type"] is not None
         else None,
         primary_anti_epidemic_measures=DICT["primary_anti_epidemic_measures"],
-        time_SES=DICT["time_SES"],
+        time_SES=None
+        if isinstance(DICT.get("time_SES"), str)
+        else DICT.get("time_SES"),
         w_id=work.w_id if work is not None else None,
         date_diagnoz=DICT["date_diagnoz"],
         di_id=diag.di_id,
-        lab_confirm=DICT["lab_confirm"],
+        lab_confirm=DICT.get("lab_confirm") is True,
     )
