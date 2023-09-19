@@ -2,6 +2,7 @@ import requests
 from base64 import b64decode
 from bs4 import BeautifulSoup
 from sqlalchemy import and_
+from datetime import date
 
 from models import Meddoc, Doctor, Work, Case, Adress, Diagnoz, CaseContent
 from conf import settings
@@ -63,21 +64,21 @@ async def parsing_semd(doc: Meddoc):
         doc_snils=DICT.get("doc_snils") not in (None, ""),
         adress_reg=DICT.get("adress_reg") not in (None, ""),
         adress_reg_fias=DICT.get("adress_reg_fias") not in (None, ""),
-        date_sickness=DICT.get("date_sickness") not in (None, ""),
-        date_first_req=DICT.get("date_first_req") not in (None, ""),
+        date_sickness=isinstance(DICT.get("date_sickness"), date),
+        date_first_req=isinstance(DICT.get("date_first_req"), date),
         hospitalization_type=DICT.get("hospitalization_type") not in (None, ""),
         primary_anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures")
         not in (None, ""),
-        time_SES=not isinstance(DICT.get("time_SES"), str)
+        time_SES=isinstance(DICT.get("time_SES"), date)
         and DICT.get("time_SES") is not None,
         work_adress=DICT.get("work_adress") not in (None, ""),
         work_adress_fias=DICT.get("work_adress_fias") not in (None, ""),
         work_name=DICT.get("work_name") not in (None, ""),
-        work_last_date=DICT.get("work_last_date") not in (None, ""),
-        date_diagnoz=DICT.get("") not in (None, ""),
-        diagnoz=DICT.get("") not in (None, ""),
-        MKB=DICT.get("") not in (None, ""),
-        lab_confirm=DICT.get("") not in (None, ""),
+        work_last_date=isinstance(DICT.get("work_last_date"), date),
+        date_diagnoz=isinstance(DICT.get("date_diagnoz"), date),
+        diagnoz=DICT.get("diagnoz") not in (None, ""),
+        MKB=DICT.get("MKB") not in (None, ""),
+        lab_confirm=DICT.get("lab_confirm") not in (None, ""),
     )
 
     # ==== сначала пробуем получить доктора =====
@@ -155,8 +156,12 @@ async def parsing_semd(doc: Meddoc):
         meddoc_biz_key=doc.meddoc_biz_key,
         d_id=doctor.d_id,
         a_id=adr.a_id,
-        date_sicness=DICT["date_sickness"],
-        date_first_req=DICT["date_first_req"],
+        date_sicness=DICT["date_sickness"]
+        if isinstance(DICT["date_sickness"], date)
+        else None,
+        date_first_req=DICT["date_first_req"]
+        if isinstance(DICT["date_first_req"], date)
+        else None,
         hospitalization_type=int(DICT["hospitalization_type"])
         if DICT["hospitalization_type"] is not None
         else None,
@@ -165,7 +170,9 @@ async def parsing_semd(doc: Meddoc):
         if isinstance(DICT.get("time_SES"), str)
         else DICT.get("time_SES"),
         w_id=work.w_id if work is not None else None,
-        date_diagnoz=DICT["date_diagnoz"],
+        date_diagnoz=DICT["date_diagnoz"]
+        if isinstance(DICT["date_diagnoz"], date)
+        else None,
         di_id=diag.di_id,
         lab_confirm=DICT.get("lab_confirm") is True,
     )

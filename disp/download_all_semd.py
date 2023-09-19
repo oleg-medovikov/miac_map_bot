@@ -8,6 +8,7 @@ from asyncpg.exceptions import UniqueViolationError
 from .dispetcher import dp
 from models import User, Log, Meddoc
 from func import get_chat_fio, delete_message, parsing_semd
+from exept import NoTokenYandex
 
 
 class error(Exception):
@@ -41,6 +42,13 @@ async def download_all_semd(message: Message):
         except UniqueViolationError:
             await doc.update(processed=True).apply()
             continue
+        except NoTokenYandex:
+            await message.answer(
+                "Закончились Токены и я закончил",
+                disable_notification=True,
+                parse_mode="MarkdownV2",
+            )
+            break
         except error:
             await doc.update(error=True).apply()
         except Exception as e:

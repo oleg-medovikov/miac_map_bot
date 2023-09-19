@@ -25,15 +25,41 @@ def analis_cda(soup: BeautifulSoup) -> dict:
     "читаем и вытаскиваем данные"
     DICT = {}
 
+    # ===== пробуем вытащить поле пациент ==========
+    patient = soup.find("patient")
+    if patient is not None:
+        for _ in patient.find_all():
+            code = _.get("code")
+            codeSystem = _.get("codeSystem")
+            displayName = _.get("displayName")
+
+            if codeSystem == "1.2.643.5.1.13.13.11.1005":
+                DICT["MKB"] = code
+                DICT["diagnoz"] = displayName
+
     # ===== поиск адреса регистрации ========
     for addr in soup.find_all("addr"):
-        if (
-            return_attr(addr.find("address:Type"), "codeSystem")
-            == "1.2.643.5.1.13.13.11.1504"
-            and return_attr(addr.find("address:Type"), "code") == "1"
+        print(addr)
+        print("+++++++++++++")
+        if return_attr(
+            addr.find("address:Type"), "codeSystem"
+        ) == "1.2.643.5.1.13.13.11.1504" and return_attr(
+            addr.find("address:Type"), "code"
+        ) in (
+            "1",
+            "2",
+            "3",
         ):
             DICT["adress_reg"] = return_attr(addr.find("streetAddressLine"), "text")
             DICT["adress_reg_fias"] = return_attr(addr.find("fias:HOUSEGUID"), "text")
+        # 4 код по этому справочнику  - место работы
+        if (
+            return_attr(addr.find("address:Type"), "codeSystem")
+            == "1.2.643.5.1.13.13.11.1504"
+            and return_attr(addr.find("address:Type"), "code") == "4"
+        ):
+            DICT["work_adress"] = return_attr(addr.find("streetAddressLine"), "text")
+            DICT["work_adress_fias"] = return_attr(addr.find("fias:HOUSEGUID"), "text")
 
     # ==== Разбираем врача ===========
     for autor in soup.find_all("assignedAuthor"):
@@ -152,6 +178,8 @@ def analis_cda(soup: BeautifulSoup) -> dict:
             DICT["diagnoz"] = obs.text.strip()
             if obs.value.get("codeSystem") == "1.2.643.5.1.13.13.11.1005":
                 DICT["MKB"] = obs.value.get("code")
+                if DICT["diagnoz"] == "":
+                    DICT["diagnoz"] = obs.value.get("displayName")
             continue
 
         # Подтверждено лабораторно (да/нет)

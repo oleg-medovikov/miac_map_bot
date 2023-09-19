@@ -1,8 +1,9 @@
 import requests
 import json
+from sqlalchemy import true
 
 from models import Token
-from sqlalchemy import func
+from exept import NoTokenYandex
 
 
 class error(Exception):
@@ -26,9 +27,13 @@ def find_values(id, json_repr):
 async def geocoder(ADR: str) -> dict:
     "Проверяем адрес с помощью геокодера яндекса"
 
-    token = await Token.query.order_by(Token.count).gino.first()
+    token = (
+        await Token.query.where(Token.active == true())
+        .order_by(Token.count)
+        .gino.first()
+    )
     if token is None:
-        raise error("нет токена для геокодера!")
+        raise NoTokenYandex("нет токена для геокодера!")
 
     # ADR = "санкт-петербург " + ADR
     ADRESS = ADR.replace(" ", "+").replace("++", "")
@@ -43,6 +48,7 @@ async def geocoder(ADR: str) -> dict:
     req = requests.get(URL)
 
     if req.status_code != 200:
+        await token.update(active=False).apply()
         raise error("токен закончился\n" + req.text)
 
     await token.update(count=token.count + 1).apply()

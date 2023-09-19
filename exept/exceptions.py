@@ -1,0 +1,2 @@
+class NoTokenYandex(Exception):
+    pass
