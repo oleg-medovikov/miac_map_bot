@@ -4,6 +4,7 @@ from .return_year import return_year
 from .get_meddoc_numbers import get_meddoc_numbers
 from .geocoder import geocoder
 from .parsing_semd import parsing_semd
+from .start_download_semd import start_download_semd
 
 __all__ = [
     "get_chat_fio",
@@ -12,4 +13,5 @@ __all__ = [
     "get_meddoc_numbers",
     "geocoder",
     "parsing_semd",
+    "start_download_semd",
 ]

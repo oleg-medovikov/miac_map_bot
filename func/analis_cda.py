@@ -39,8 +39,6 @@ def analis_cda(soup: BeautifulSoup) -> dict:
 
     # ===== поиск адреса регистрации ========
     for addr in soup.find_all("addr"):
-        print(addr)
-        print("+++++++++++++")
         if return_attr(
             addr.find("address:Type"), "codeSystem"
         ) == "1.2.643.5.1.13.13.11.1504" and return_attr(
@@ -100,7 +98,6 @@ def analis_cda(soup: BeautifulSoup) -> dict:
     # отдельный способ разбирать даты
     for date in soup.find_all("effectiveTime"):
         parents = date.find_previous_siblings()
-        print(date)
         for parent in parents:
             codeSystem = parent.get("codeSystem")
             code = parent.get("code")
@@ -119,7 +116,6 @@ def analis_cda(soup: BeautifulSoup) -> dict:
             # Диагноз
             if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "838":
                 DICT["date_diagnoz"] = return_attr(date, "value")
-                print(DICT["date_diagnoz"], "diagnoz")
                 continue
 
     # ====== Разбираем показатели

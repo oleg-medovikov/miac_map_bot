@@ -2,13 +2,11 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram import md
 from sqlalchemy import false, and_
-from asyncpg.exceptions import UniqueViolationError
 
 
 from .dispetcher import dp
-from models import User, Log, Meddoc, Error
-from func import get_chat_fio, delete_message, parsing_semd
-from exept import NoTokenYandex, NoCDAfiles, NoFindReg, NoFindMKB
+from models import User, Log, Meddoc
+from func import get_chat_fio, delete_message, start_download_semd
 
 
 @dp.message(Command("download_all_semd"))
@@ -32,38 +30,4 @@ async def download_all_semd(message: Message):
     await message.answer(
         md.quote(MESS), disable_notification=True, parse_mode="MarkdownV2"
     )
-    for doc in DOCS:
-        try:
-            await parsing_semd(doc)
-        except UniqueViolationError:
-            await doc.update(processed=True).apply()
-            continue
-        except NoTokenYandex:
-            await message.answer(
-                "Закончились Токены и я закончил",
-                disable_notification=True,
-                parse_mode="MarkdownV2",
-            )
-            break
-        except NoCDAfiles:
-            # нулевая ошибка обработки, нет файла
-            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=0)
-            continue
-        except NoFindReg:
-            # Не найден адрес регистрации
-            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=1)
-            continue
-        except NoFindMKB:
-            # не найден диагноз!
-            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=2)
-            continue
-
-        except Exception as e:
-            await doc.update(error=True).apply()
-            await message.answer(
-                md.quote(str(e) + f"\n {doc.meddoc_biz_key}"),
-                disable_notification=True,
-                parse_mode="MarkdownV2",
-            )
-        else:
-            await doc.update(processed=True).apply()
+    await start_download_semd(DOCS)

@@ -31,7 +31,7 @@ async def parsing_semd(doc: Meddoc):
     try:
         req.json()["entry"][0]["resource"]["content"]
     except KeyError:
-        raise error("Нет прикрепленных файлов!")
+        raise NoCDAfiles("Нет прикрепленных файлов!")
 
     DICT = {}
     # разбираем прикрепленные файлы и ищем cda
@@ -159,14 +159,14 @@ async def parsing_semd(doc: Meddoc):
         meddoc_biz_key=doc.meddoc_biz_key,
         d_id=doctor.d_id,
         a_id=adr.a_id,
-        date_sicness=DICT["date_sickness"]
-        if isinstance(DICT["date_sickness"], date)
+        date_sicness=DICT.get("date_sickness")
+        if isinstance(DICT.get("date_sickness"), date)
         else None,
         date_first_req=DICT["date_first_req"]
-        if isinstance(DICT["date_first_req"], date)
+        if isinstance(DICT.get("date_first_req"), date)
         else None,
         hospitalization_type=int(DICT["hospitalization_type"])
-        if str(DICT["hospitalization_type"]).isdigit()
+        if DICT.get("hospitalization_type", "").isdigit()
         else None,
         primary_anti_epidemic_measures=DICT["primary_anti_epidemic_measures"],
         time_SES=None

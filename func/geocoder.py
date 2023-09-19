@@ -3,7 +3,7 @@ import json
 from sqlalchemy import true
 
 from models import Token
-from exept import NoTokenYandex
+from exept import NoTokenYandex, TokenYandexExceed
 
 
 class error(Exception):
@@ -49,7 +49,7 @@ async def geocoder(ADR: str) -> dict:
 
     if req.status_code != 200:
         await token.update(active=False).apply()
-        raise error("токен закончился\n" + req.text)
+        raise TokenYandexExceed("токен закончился\n" + req.text)
 
     await token.update(count=token.count + 1).apply()
     DATA = req.text

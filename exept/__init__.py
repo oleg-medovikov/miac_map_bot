@@ -3,6 +3,7 @@ from .exceptions import (
     NoCDAfiles,
     NoFindMKB,
     NoFindReg,
+    TokenYandexExceed,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "NoCDAfiles",
     "NoFindMKB",
     "NoFindReg",
+    "TokenYandexExceed",
 ]
