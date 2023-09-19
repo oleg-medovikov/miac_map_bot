@@ -6,13 +6,9 @@ from asyncpg.exceptions import UniqueViolationError
 
 
 from .dispetcher import dp
-from models import User, Log, Meddoc
+from models import User, Log, Meddoc, Error
 from func import get_chat_fio, delete_message, parsing_semd
-from exept import NoTokenYandex
-
-
-class error(Exception):
-    pass
+from exept import NoTokenYandex, NoCDAfiles, NoFindReg, NoFindMKB
 
 
 @dp.message(Command("download_all_semd"))
@@ -49,8 +45,19 @@ async def download_all_semd(message: Message):
                 parse_mode="MarkdownV2",
             )
             break
-        except error:
-            await doc.update(error=True).apply()
+        except NoCDAfiles:
+            # нулевая ошибка обработки, нет файла
+            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=0)
+            continue
+        except NoFindReg:
+            # Не найден адрес регистрации
+            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=1)
+            continue
+        except NoFindMKB:
+            # не найден диагноз!
+            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=2)
+            continue
+
         except Exception as e:
             await doc.update(error=True).apply()
             await message.answer(

@@ -8,6 +8,7 @@ from models import Meddoc, Doctor, Work, Case, Adress, Diagnoz, CaseContent
 from conf import settings
 from .geocoder import geocoder
 from .analis_cda import analis_cda
+from exept import NoCDAfiles, NoFindMKB, NoFindReg
 
 
 class error(Exception):
@@ -48,7 +49,7 @@ async def parsing_semd(doc: Meddoc):
             continue
 
     if DICT == {}:
-        raise error("не удалось проанализировать файлы")
+        raise NoCDAfiles("не удалось проанализировать файлы")
     # === анализируем, что удалось вытащить из файла
     content = await CaseContent.query.where(
         CaseContent.meddoc_biz_key == doc.meddoc_biz_key
@@ -100,7 +101,7 @@ async def parsing_semd(doc: Meddoc):
         )
     # ==== теперь получаем адрес регистрации ====
     if DICT.get("adress_reg") in (None, ""):
-        raise error("не найден адрес регистрации!")
+        raise NoFindReg("не найден адрес регистрации!")
     adr = await Adress.query.where(Adress.line == DICT["adress_reg"]).gino.first()
     if adr is None:
         ADR = await geocoder(DICT["adress_reg"])
@@ -137,6 +138,8 @@ async def parsing_semd(doc: Meddoc):
     else:
         work = None
     # ==== получаем диагноз =====
+    if DICT.get("MKB") in (None, ""):
+        raise NoFindMKB("Нет диагноза!")
     diag = (
         await Diagnoz.query.where(Diagnoz.MKB == DICT["MKB"])
         .where(Diagnoz.diagnoz == DICT["diagnoz"])
@@ -163,7 +166,7 @@ async def parsing_semd(doc: Meddoc):
         if isinstance(DICT["date_first_req"], date)
         else None,
         hospitalization_type=int(DICT["hospitalization_type"])
-        if DICT["hospitalization_type"] is not None
+        if str(DICT["hospitalization_type"]).isdigit()
         else None,
         primary_anti_epidemic_measures=DICT["primary_anti_epidemic_measures"],
         time_SES=None

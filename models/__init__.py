@@ -9,6 +9,7 @@ from .Work import Work
 from .Case import Case
 from .CaseContent import CaseContent
 from .Diagnoz import Diagnoz
+from .Error import Error
 
 __all__ = [
     "User",
@@ -22,4 +23,5 @@ __all__ = [
     "Case",
     "Diagnoz",
     "CaseContent",
+    "Error",
 ]
