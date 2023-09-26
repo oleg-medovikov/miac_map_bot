@@ -8,14 +8,10 @@ from models import Meddoc, Doctor, Work, Case, Adress, Diagnoz, CaseContent
 from conf import settings
 from .geocoder import geocoder
 from .analis_cda import analis_cda
-from exept import NoCDAfiles, NoFindMKB, NoFindReg
+from exept import NetricaError, NoCDAfiles, NoFindMKB, NoFindReg
 
 
-class error(Exception):
-    pass
-
-
-async def parsing_semd(doc: Meddoc):
+async def parsing_semd(doc: "Meddoc") -> "Case":
     "скачиваем и записваем в базу результат анализа"
     URL = (
         settings.REGIZ_URL_2
@@ -26,7 +22,7 @@ async def parsing_semd(doc: Meddoc):
 
     req = requests.get(URL, headers=HEADER)
     if req.status_code != 200:
-        raise error("проблема с подключением\n" + URL)
+        raise NetricaError("проблема с подключением\n" + URL)
 
     try:
         req.json()["entry"][0]["resource"]["content"]
@@ -51,36 +47,58 @@ async def parsing_semd(doc: Meddoc):
     if DICT == {}:
         raise NoCDAfiles("не удалось проанализировать файлы")
     # === анализируем, что удалось вытащить из файла
-    content = await CaseContent.query.where(
-        CaseContent.meddoc_biz_key == doc.meddoc_biz_key
+    cont = await CaseContent.query.where(
+        and_(
+            doc_fio=DICT.get("doc_fio") not in (None, ""),
+            doc_telefon=DICT.get("doc_telefon") not in (None, ""),
+            doc_spec=DICT.get("doc_spec") not in (None, ""),
+            doc_snils=DICT.get("doc_snils") not in (None, ""),
+            adress_reg=DICT.get("adress_reg") not in (None, ""),
+            adress_reg_fias=DICT.get("adress_reg_fias") not in (None, ""),
+            date_sickness=isinstance(DICT.get("date_sickness"), date),
+            date_first_req=isinstance(DICT.get("date_first_req"), date),
+            hospitalization_type=DICT.get("hospitalization_type") not in (None, ""),
+            primary_anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures")
+            not in (None, ""),
+            time_SES=isinstance(DICT.get("time_SES"), date)
+            and DICT.get("time_SES") is not None,
+            work_adress=DICT.get("work_adress") not in (None, ""),
+            work_adress_fias=DICT.get("work_adress_fias") not in (None, ""),
+            work_name=DICT.get("work_name") not in (None, ""),
+            work_last_date=isinstance(DICT.get("work_last_date"), date),
+            date_diagnoz=isinstance(DICT.get("date_diagnoz"), date),
+            diagnoz=DICT.get("diagnoz") not in (None, ""),
+            MKB=DICT.get("MKB") not in (None, ""),
+            lab_confirm=DICT.get("lab_confirm") not in (None, ""),
+        )
     ).gino.first()
-    if content is not None:
-        await content.delete()
-    await CaseContent.create(
-        meddoc_biz_key=doc.meddoc_biz_key,
-        org_id=doc.org_id,
-        doc_fio=DICT.get("doc_fio") not in (None, ""),
-        doc_telefon=DICT.get("doc_telefon") not in (None, ""),
-        doc_spec=DICT.get("doc_spec") not in (None, ""),
-        doc_snils=DICT.get("doc_snils") not in (None, ""),
-        adress_reg=DICT.get("adress_reg") not in (None, ""),
-        adress_reg_fias=DICT.get("adress_reg_fias") not in (None, ""),
-        date_sickness=isinstance(DICT.get("date_sickness"), date),
-        date_first_req=isinstance(DICT.get("date_first_req"), date),
-        hospitalization_type=DICT.get("hospitalization_type") not in (None, ""),
-        primary_anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures")
-        not in (None, ""),
-        time_SES=isinstance(DICT.get("time_SES"), date)
-        and DICT.get("time_SES") is not None,
-        work_adress=DICT.get("work_adress") not in (None, ""),
-        work_adress_fias=DICT.get("work_adress_fias") not in (None, ""),
-        work_name=DICT.get("work_name") not in (None, ""),
-        work_last_date=isinstance(DICT.get("work_last_date"), date),
-        date_diagnoz=isinstance(DICT.get("date_diagnoz"), date),
-        diagnoz=DICT.get("diagnoz") not in (None, ""),
-        MKB=DICT.get("MKB") not in (None, ""),
-        lab_confirm=DICT.get("lab_confirm") not in (None, ""),
-    )
+    if cont is None:
+        cont = await CaseContent.create(
+            doc_fio=DICT.get("doc_fio") not in (None, ""),
+            doc_telefon=DICT.get("doc_telefon") not in (None, ""),
+            doc_spec=DICT.get("doc_spec") not in (None, ""),
+            doc_snils=DICT.get("doc_snils") not in (None, ""),
+            adress_reg=DICT.get("adress_reg") not in (None, ""),
+            adress_reg_fias=DICT.get("adress_reg_fias") not in (None, ""),
+            date_sickness=isinstance(DICT.get("date_sickness"), date),
+            date_first_req=isinstance(DICT.get("date_first_req"), date),
+            hospitalization_type=DICT.get("hospitalization_type") not in (None, ""),
+            primary_anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures")
+            not in (None, ""),
+            time_SES=isinstance(DICT.get("time_SES"), date)
+            and DICT.get("time_SES") is not None,
+            work_adress=DICT.get("work_adress") not in (None, ""),
+            work_adress_fias=DICT.get("work_adress_fias") not in (None, ""),
+            work_name=DICT.get("work_name") not in (None, ""),
+            work_last_date=isinstance(DICT.get("work_last_date"), date),
+            date_diagnoz=isinstance(DICT.get("date_diagnoz"), date),
+            diagnoz=DICT.get("diagnoz") not in (None, ""),
+            MKB=DICT.get("MKB") not in (None, ""),
+            lab_confirm=DICT.get("lab_confirm") not in (None, ""),
+        )
+    # добавляем в док анализ контента
+
+    await doc.update(content=cont.id).apply()
 
     # ==== сначала пробуем получить доктора =====
     doctor = await Doctor.query.where(
@@ -140,42 +158,44 @@ async def parsing_semd(doc: Meddoc):
     # ==== получаем диагноз =====
     if DICT.get("MKB") in (None, ""):
         raise NoFindMKB("Нет диагноза!")
-    diag = (
-        await Diagnoz.query.where(Diagnoz.MKB == DICT["MKB"])
-        .where(Diagnoz.diagnoz == DICT["diagnoz"])
-        .gino.first()
-    )
-    if diag is None:
-        diag = await Diagnoz.create(MKB=DICT["MKB"], diagnoz=DICT["diagnoz"])
+    diag = await Diagnoz.query.where(
+        and_(
+            Diagnoz.MKB == DICT.get("MKB"),
+            Diagnoz.diagnoz == DICT.get("diagnoz"),
+        )
+    ).gino.first()
 
-    # === наконец-то пробуем сосздать сам случай извещения ===
+    if diag is None:
+        diag = await Diagnoz.create(MKB=DICT.get("MKB"), diagnoz=DICT.get("diagnoz"))
+
+    # === наконец-то пробуем создать сам случай извещения ===
     case = await Case.query.where(
         Case.meddoc_biz_key == doc.meddoc_biz_key
     ).gino.first()
     if case is not None:
         await case.delete()
 
-    await Case.create(
-        meddoc_biz_key=doc.meddoc_biz_key,
+    case = await Case.create(
         d_id=doctor.d_id,
         a_id=adr.a_id,
+        w_id=None if work is None else work.id,
+        di_id=diag.id,
         date_sicness=DICT.get("date_sickness")
         if isinstance(DICT.get("date_sickness"), date)
         else None,
         date_first_req=DICT["date_first_req"]
         if isinstance(DICT.get("date_first_req"), date)
         else None,
-        hospitalization_type=int(DICT["hospitalization_type"])
-        if DICT.get("hospitalization_type", "").isdigit()
-        else None,
-        primary_anti_epidemic_measures=DICT["primary_anti_epidemic_measures"],
         time_SES=None
         if isinstance(DICT.get("time_SES"), str)
         else DICT.get("time_SES"),
-        w_id=work.w_id if work is not None else None,
         date_diagnoz=DICT["date_diagnoz"]
         if isinstance(DICT["date_diagnoz"], date)
         else None,
-        di_id=diag.di_id,
+        hospitalization=int(DICT.get("hospitalization_type", 1))
+        if DICT.get("hospitalization_type", "").isdigit()
+        else None,
+        anti_epidemic_measures=DICT.get("primary_anti_epidemic_measures"),
         lab_confirm=DICT.get("lab_confirm") is True,
     )
+    return case

@@ -1,5 +1,6 @@
 from .exceptions import (
     NoTokenYandex,
+    NetricaError,
     NoCDAfiles,
     NoFindMKB,
     NoFindReg,
@@ -8,6 +9,7 @@ from .exceptions import (
 
 __all__ = [
     "NoTokenYandex",
+    "NetricaError",
     "NoCDAfiles",
     "NoFindMKB",
     "NoFindReg",

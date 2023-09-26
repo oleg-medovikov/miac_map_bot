@@ -6,6 +6,10 @@ class TokenYandexExceed(Exception):
     pass
 
 
+class NetricaError(Exception):
+    pass
+
+
 class NoCDAfiles(Exception):
     pass
 

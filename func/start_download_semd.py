@@ -1,9 +1,17 @@
 from asyncpg.exceptions import UniqueViolationError
 from aiogram import md
+from sqlalchemy import and_, false, true
+from datetime import datetime
 
-
-from models import Error
-from exept import NoTokenYandex, NoCDAfiles, NoFindReg, NoFindMKB, TokenYandexExceed
+from models import MeddocError, Reading
+from exept import (
+    NoTokenYandex,
+    NetricaError,
+    NoCDAfiles,
+    NoFindReg,
+    NoFindMKB,
+    TokenYandexExceed,
+)
 from .parsing_semd import parsing_semd
 from conf import settings
 from disp import bot
@@ -17,18 +25,27 @@ async def start_download_semd(DOCS: list):
         "error": 0,
         "done": 0,
     }
-    for doc in DOCS:
-        error = await Error.query.where(
-            Error.meddoc_biz_key == doc.meddoc_biz_key
-        ).gino.first()
-        if error is not None:
-            STAT["skip"] += 1
-            continue
+    read_false = await Reading.query.where(
+        and_(
+            Reading.date == datetime.today(),
+            Reading.result == false(),
+        )
+    ).gino.first()
+    if read_false is None:
+        read_false = await Reading.create(date=datetime.today(), result=False)
+    read_true = await Reading.query.where(
+        and_(
+            Reading.date == datetime.today(),
+            Reading.result == true(),
+        )
+    ).gino.first()
+    if read_true is None:
+        read_true = await Reading.create(date=datetime.today(), result=True)
 
+    for doc in DOCS:
         try:
-            await parsing_semd(doc)
+            case = await parsing_semd(doc)
         except UniqueViolationError:
-            await doc.update(processed=True).apply()
             STAT["double"] += 1
             continue
         except NoTokenYandex:
@@ -42,20 +59,28 @@ async def start_download_semd(DOCS: list):
         except TokenYandexExceed:
             # что-то случилось с геокодером, просто идем далее
             STAT["skip"] += 1
+            await doc.update(r_id=read_false.id).apply()
+            continue
+        except NetricaError:
+            STAT["skip"] += 1
+            await doc.update(r_id=read_false.id).apply()
             continue
         except NoCDAfiles:
             # нулевая ошибка обработки, нет файла
-            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=0)
+            await MeddocError.create(meddoc=doc.id, error=0)
+            await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             continue
         except NoFindReg:
             # Не найден адрес регистрации
-            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=1)
+            await MeddocError.create(meddoc=doc.id, error=1)
+            await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             continue
         except NoFindMKB:
             # не найден диагноз!
-            await Error.create(meddoc_biz_key=doc.meddoc_biz_key, error=2)
+            await MeddocError.create(meddoc=doc.id, error=2)
+            await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             continue
 
@@ -69,7 +94,7 @@ async def start_download_semd(DOCS: list):
                 parse_mode="MarkdownV2",
             )
         else:
-            await doc.update(processed=True).apply()
+            await doc.update(r_id=read_true.id, c_id=case.id).apply()
             STAT["done"] += 1
 
     mess = (

@@ -1,7 +1,7 @@
 from sqlalchemy import false, and_
 from aiogram import md
 
-from models import Meddoc, Log
+from models import Meddoc
 from conf import settings
 from disp import bot
 from func import start_download_semd
@@ -14,7 +14,6 @@ async def download_semds_automatic():
 
     MESS = f"Всего не загруженных семдов на данный момент: {len(DOCS)}"
 
-    await Log.create(u_id=int(settings.MASTER), action=12, result=MESS)
     await bot.send_message(
         settings.MASTER,
         md.quote(MESS),

@@ -4,7 +4,6 @@ from aiogram import md
 from conf import settings
 from disp import bot
 from func import get_meddoc_numbers
-from models import Log
 
 
 async def get_meddoc_automatic():
@@ -20,7 +19,6 @@ async def get_meddoc_automatic():
     MESS += "\n\n"
     MESS += await get_meddoc_numbers(START, STOP)
 
-    await Log.create(u_id=int(settings.MASTER), action=11, result=MESS)
     return await bot.send_message(
         settings.MASTER,
         md.quote(MESS),

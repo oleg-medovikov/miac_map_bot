@@ -5,7 +5,6 @@ class CaseContent(db.Model):
     __tablename__ = "case_content"
 
     id = db.Column(db.Integer, primary_key=True)
-    org_id = db.Column(db.SmallInteger)
     doc_fio = db.Column(db.Boolean)
     doc_telefon = db.Column(db.Boolean)
     doc_spec = db.Column(db.Boolean)
