@@ -27,7 +27,8 @@ MESS = """*Доступные команды для редактирования
 
 @dp.message(Command("admin_panel"))
 async def admin_panel(message: Message):
-    if not await check_user(message, "admin"):
+    check, user = await check_user(message, "admin")
+    if not check:
         return
-    await UserLog.create(u_id=message.chat.id, action=10)
+    await UserLog.create(u_id=user.id, a_id=10)
     return await message.answer(MESS, disable_notification=True, parse_mode="Markdown")

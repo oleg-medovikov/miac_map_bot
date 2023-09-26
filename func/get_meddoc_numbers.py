@@ -42,7 +42,8 @@ async def get_meddoc_numbers(START: date, STOP: date) -> str:
         patient = await Patient.query.where(
             and_(
                 Patient.global_id == UUID(_.get("case_patient_global_key")),
-                Patient.birthdate_baby == _.get("birthcertificate_birthdate"),
+                Patient.birthdate_baby
+                == parse_date(_.get("birthcertificate_birthdate")),
             )
         ).gino.first()
         if patient is None:
