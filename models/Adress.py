@@ -1,15 +1,15 @@
 from base import db
-from datetime import datetime
+
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class Adress(db.Model):
-    __tablename__ = "adresses"
+    __tablename__ = "adress"
 
-    a_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
     line = db.Column(db.String)
-    fias = db.Column(db.String, nullable=True)
     point = db.Column(db.ARRAY(db.Float))
     text = db.Column(db.String)
-    street = db.Column(db.String(100))
-    house = db.Column(db.String(20))
-    date_update = db.Column(db.DateTime(), default=datetime.now())
+    fias = db.Column(UUID, nullable=True)
+    street = db.Column(db.String(100), nullable=True)
+    house = db.Column(db.String(20), nullable=True)

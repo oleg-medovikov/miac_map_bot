@@ -8,9 +8,6 @@ from asyncpg.exceptions import UniqueViolationError
 from conf import settings
 from models import Org, Meddoc
 
-REGIZ_URL = "https://regiz.gorzdrav.spb.ru/N3.BI/getDData"
-REGIZ_TOKEN = "9f9208b9-f7e1-4e17-8cfc-a6832e03a12f"
-
 
 def parse_date(STR: str) -> Optional["date"]:
     if STR is None or STR == "":

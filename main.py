@@ -1,6 +1,6 @@
 """
 Этот бот написан для выгрузки 
-экстренных извещений об инфекционных заболеваний.
+экстренных извещений инфекционных заболеваний.
 Передача формы №058/у СЭМДами от МО
 для последущей обработки и создания тепловых карт
 Автор: Медовиков Олег
@@ -18,7 +18,7 @@ async def on_startup():
     scheduler = create_scheduler()
     scheduler.start()
     await db.set_bind(settings.DATABASE_URL)
-    # await db.gino.create_all()
+    await db.gino.create_all()
     await dp.start_polling(bot)
 
 

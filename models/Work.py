@@ -1,5 +1,4 @@
 from base import db
-from datetime import datetime
 
 """
 все что связано с адресом работы перенес в таблицу адресов,
@@ -8,9 +7,16 @@ from datetime import datetime
 
 
 class Work(db.Model):
-    __tablename__ = "works"
+    __tablename__ = "work"
 
-    w_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
+    a_id = db.Column(db.Integer, db.ForeignKey("adress.id"))
     name = db.Column(db.String, nullable=True)
-    a_id = db.Column(db.Integer)
-    date_update = db.Column(db.DateTime(), default=datetime.now())
+
+    @property
+    def adress(self):
+        return self._adress
+
+    @adress.setter
+    def adress(self, value):
+        self._adress = value

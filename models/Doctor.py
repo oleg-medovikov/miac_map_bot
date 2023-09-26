@@ -1,13 +1,12 @@
 from base import db
-from datetime import datetime
 
 
 class Doctor(db.Model):
-    __tablename__ = "doctors"
+    __tablename__ = "doctor"
 
-    d_id = db.Column(db.SmallInteger, primary_key=True, autoincrement=True)
+    id = db.Column(db.SmallInteger, primary_key=True)
     org = db.Column(db.String)
     fio = db.Column(db.String(200))
-    telefon = db.Column(db.String(20))
-    spec = db.Column(db.String)
-    date_update = db.Column(db.DateTime(), default=datetime.now())
+    snils = db.Column(db.Integer, nullable=True)
+    telefon = db.Column(db.String(20), nullable=True)
+    spec = db.Column(db.String, nullable=True)

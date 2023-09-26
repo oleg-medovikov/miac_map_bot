@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class Token(db.Model):
-    __tablename__ = "tokens"
+    __tablename__ = "token"
 
     token = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(20))

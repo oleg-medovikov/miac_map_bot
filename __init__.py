@@ -3,7 +3,8 @@ import base
 import models
 import func
 import exept
-import shed
+
+# import shed
 
 __all__ = [
     "conf",
@@ -11,5 +12,5 @@ __all__ = [
     "models",
     "func",
     "exept",
-    "shed",
+    # "shed",
 ]

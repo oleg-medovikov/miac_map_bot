@@ -1,26 +1,32 @@
 from .User import User
+from .UserLog import UserLog
+from .UserAction import UserAction
 from .Meddoc import Meddoc
+from .Patient import Patient
 from .Org import Org
-from .Log import Log
 from .Doctor import Doctor
 from .Token import Token
 from .Adress import Adress
 from .Work import Work
 from .Case import Case
+from .Reading import Reading
 from .CaseContent import CaseContent
 from .Diagnoz import Diagnoz
 from .Error import Error
 
 __all__ = [
     "User",
+    "UserLog",
+    "UserAction",
     "Meddoc",
+    "Patient",
     "Org",
-    "Log",
     "Doctor",
     "Token",
     "Adress",
     "Work",
     "Case",
+    "Reading",
     "Diagnoz",
     "CaseContent",
     "Error",

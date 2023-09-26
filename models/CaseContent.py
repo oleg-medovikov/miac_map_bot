@@ -2,9 +2,9 @@ from base import db
 
 
 class CaseContent(db.Model):
-    __tablename__ = "content"
+    __tablename__ = "case_content"
 
-    meddoc_biz_key = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     org_id = db.Column(db.SmallInteger)
     doc_fio = db.Column(db.Boolean)
     doc_telefon = db.Column(db.Boolean)
