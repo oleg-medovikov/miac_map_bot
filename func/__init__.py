@@ -5,6 +5,7 @@ from .geocoder import geocoder
 from .write_styling_excel import write_styling_excel
 from .get_one_meddoc import get_one_meddoc
 from .check_user import check_user
+from .parse_date import parse_date
 
 __all__ = [
     "get_chat_fio",
@@ -14,4 +15,5 @@ __all__ = [
     "geocoder",
     "get_one_meddoc",
     "write_styling_excel",
+    "parse_date",
 ]
