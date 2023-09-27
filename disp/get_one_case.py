@@ -8,7 +8,8 @@ from func import check_user, get_one_meddoc
 
 @dp.message(Command("get_one_case"))
 async def get_one_case(message: Message):
-    if not await check_user(message, "user"):
+    check, user = await check_user(message, "user")
+    if not check:
         return
 
     MESS = "Делаю выгрузку одного меддока: "
@@ -18,7 +19,7 @@ async def get_one_case(message: Message):
     MESS += get_one_meddoc()
     MESS += "\n ``` "
 
-    await UserLog.create(u_id=message.chat.id, action=11, result=MESS)
+    await UserLog.create(u_id=user.id, a_id=12)
     return await message.answer(
         MESS, disable_notification=True, parse_mode="MarkdownV2"
     )

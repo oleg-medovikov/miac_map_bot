@@ -187,4 +187,8 @@ def analis_cda(soup: BeautifulSoup) -> dict:
                 DICT["lab_confirm"] = False
             continue
 
+    for key, value in DICT.items():
+        if value == "":
+            DICT.pop(key)
+
     return DICT

@@ -24,7 +24,7 @@ class Meddoc(db.Model):
     # результат прочтения - случай case
     c_id = db.Column(db.Integer, db.ForeignKey("case.id"), nullable=True)
     # наполнение контентом - что нашлось в сэмде
-    content = db.Column(db.Integer, db.ForeignKey("case_content.id"), nullable=True)
+    cc_id = db.Column(db.Integer, db.ForeignKey("case_content.id"), nullable=True)
 
     @property
     def org(self):
