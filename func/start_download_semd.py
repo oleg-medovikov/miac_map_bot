@@ -67,25 +67,24 @@ async def start_download_semd(DOCS: list):
             continue
         except NoCDAfiles:
             # нулевая ошибка обработки, нет файла
-            await MeddocError.create(meddoc=doc.id, error=0)
+            await MeddocError.create(m_id=doc.id, e_id=0)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             continue
         except NoFindReg:
             # Не найден адрес регистрации
-            await MeddocError.create(meddoc=doc.id, error=1)
+            await MeddocError.create(m_id=doc.id, e_id=1)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             continue
         except NoFindMKB:
             # не найден диагноз!
-            await MeddocError.create(meddoc=doc.id, error=2)
+            await MeddocError.create(m_id=doc.id, e_id=2)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             continue
 
         except Exception as e:
-            await doc.update(error=True).apply()
             STAT["error"] += 1
             await bot.send_message(
                 settings.MASTER,
@@ -93,6 +92,7 @@ async def start_download_semd(DOCS: list):
                 disable_notification=True,
                 parse_mode="MarkdownV2",
             )
+            break
         else:
             await doc.update(r_id=read_true.id, c_id=case.id).apply()
             STAT["done"] += 1

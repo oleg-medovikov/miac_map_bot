@@ -5,8 +5,8 @@ class MeddocError(db.Model):
     __tablename__ = "meddoc_error"
 
     id = db.Column(db.Integer, primary_key=True)
-    meddoc = db.Column(db.Integer, db.ForeignKey("meddoc.id"))
-    error = db.Column(db.SmallInteger, db.ForeignKey("error.id"))
+    m_id = db.Column(db.Integer, db.ForeignKey("meddoc.id"))
+    e_id = db.Column(db.SmallInteger, db.ForeignKey("errors.id"))
 
     @property
     def meddoc(self):

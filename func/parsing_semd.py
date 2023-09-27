@@ -190,15 +190,9 @@ async def parsing_semd(doc: "Meddoc") -> "Case":
         diag = await Diagnoz.create(MKB=DICT.get("MKB"), diagnoz=DICT.get("diagnoz"))
 
     # === наконец-то пробуем создать сам случай извещения ===
-    case = await Case.query.where(
-        Case.meddoc_biz_key == doc.meddoc_biz_key
-    ).gino.first()
-    if case is not None:
-        await case.delete()
-
     case = await Case.create(
-        d_id=doctor.d_id,
-        a_id=adr.a_id,
+        d_id=doctor.id,
+        a_id=adr.id,
         w_id=None if work is None else work.id,
         di_id=diag.id,
         date_sicness=DICT.get("date_sickness")
