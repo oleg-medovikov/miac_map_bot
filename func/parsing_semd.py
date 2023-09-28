@@ -1,17 +1,20 @@
 import requests
 from base64 import b64decode
 from bs4 import BeautifulSoup
-from sqlalchemy import and_
 
-from models import Meddoc, Work, Case, Adress, Diagnoz
-from exept import NetricaError, NoCDAfiles, NoFindMKB, NoFindReg
+from models import Meddoc, Case
+from exept import NetricaError, NoCDAfiles
 from conf import settings
+from metod import (
+    get_case,
+    get_case_content,
+    get_doctor,
+    get_adress,
+    get_work,
+    get_diagnoz,
+)
 
-from .geocoder import geocoder
 from .analis_cda import analis_cda
-from .get_case_content import get_case_content
-from .get_doctor import get_doctor
-from .get_case import get_case
 
 
 async def parsing_semd(doc: "Meddoc") -> "Case":
@@ -56,57 +59,11 @@ async def parsing_semd(doc: "Meddoc") -> "Case":
     # ==== сначала пробуем получить доктора =====
     doctor = await get_doctor(DICT)
     # ==== теперь получаем адрес регистрации ====
-    if DICT.get("adress_reg") in (None, ""):
-        raise NoFindReg("не найден адрес регистрации!")
-
-    adress = await Adress.query.where(Adress.line == DICT["adress_reg"]).gino.first()
-    if adress is None:
-        ADR = await geocoder(DICT["adress_reg"])
-        adress = await Adress.create(
-            line=DICT["adress_reg"],
-            fias=DICT.get("adress_reg_fias"),
-            point=ADR["point"],
-            text=ADR["text"],
-            street=ADR["street"],
-            house=ADR["house"],
-        )
+    adress = await get_adress(DICT)
     # ==== получаем сведения о работе ====
-    if DICT.get("work_adress") not in (None, ""):
-        # сначала нужно получить a_id
-        work_adr = await Adress.query.where(
-            Adress.line == DICT["work_adress"]
-        ).gino.first()
-        if work_adr is None:
-            WORK_ADR = await geocoder(DICT["work_adress"])
-            work_adr = await Adress.create(
-                line=DICT["work_adress"],
-                fias=DICT.get("work_adress_fias"),
-                point=WORK_ADR["point"],
-                text=WORK_ADR["text"],
-                street=WORK_ADR["street"],
-                house=WORK_ADR["house"],
-            )
-        # ищем работу с таким же адресом и названием
-        work = await Work.query.where(
-            and_(Work.a_id == work_adr.a_id, Work.name == DICT.get("work_name"))
-        ).gino.first()
-        if work is None:
-            work = await Work.create(name=DICT["work_name"], a_id=work_adr.a_id)
-    else:
-        work = None
+    work = await get_work(DICT)
     # ==== получаем диагноз =====
-    if DICT.get("MKB") in (None, ""):
-        raise NoFindMKB("Нет диагноза!")
-    diagnoz = await Diagnoz.query.where(
-        and_(
-            Diagnoz.MKB == DICT.get("MKB"),
-            Diagnoz.diagnoz == DICT.get("diagnoz"),
-        )
-    ).gino.first()
-
-    if diagnoz is None:
-        diagnoz = await Diagnoz.create(MKB=DICT.get("MKB"), diagnoz=DICT.get("diagnoz"))
-
+    diagnoz = await get_diagnoz(DICT)
     # === наконец-то пробуем создать сам случай извещения ===
     case = await get_case(DICT, doctor, adress, work, diagnoz)
     return case
