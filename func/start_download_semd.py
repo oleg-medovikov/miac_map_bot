@@ -20,7 +20,6 @@ from disp import bot
 async def start_download_semd(DOCS: list):
     STAT = {
         "count": len(DOCS),
-        "double": 0,
         "skip": 0,
         "error": 0,
         "done": 0,
@@ -45,9 +44,6 @@ async def start_download_semd(DOCS: list):
     for doc in DOCS:
         try:
             case = await parsing_semd(doc)
-        except UniqueViolationError:
-            STAT["double"] += 1
-            continue
         except NoTokenYandex:
             await bot.send_message(
                 settings.MASTER,
@@ -60,27 +56,32 @@ async def start_download_semd(DOCS: list):
             # что-то случилось с геокодером, просто идем далее
             STAT["skip"] += 1
             await doc.update(r_id=read_false.id).apply()
+            print("ошибка яндекса")
             continue
         except NetricaError:
             STAT["skip"] += 1
             await doc.update(r_id=read_false.id).apply()
+            print("ошибка нетрики")
             continue
         except NoCDAfiles:
             # нулевая ошибка обработки, нет файла
             await MeddocError.create(m_id=doc.id, e_id=0)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
+            print("нет файлов CDA")
             continue
         except NoFindReg:
             # Не найден адрес регистрации
             await MeddocError.create(m_id=doc.id, e_id=1)
             await doc.update(r_id=read_false.id).apply()
+            print("не найден адрес регистрации")
             STAT["error"] += 1
             continue
         except NoFindMKB:
             # не найден диагноз!
             await MeddocError.create(m_id=doc.id, e_id=2)
             await doc.update(r_id=read_false.id).apply()
+            print("не найден мкб")
             STAT["error"] += 1
             continue
 
@@ -99,7 +100,6 @@ async def start_download_semd(DOCS: list):
 
     mess = (
         f'Всего файлов для обработки: {STAT["count"]}'
-        + f'\nПовторно обработаны: {STAT["double"]}'
         + f'\nПропущено: {STAT["skip"]}'
         + f'\nОшибки: {STAT["error"]}'
         + f'\nОбработано успешно: {STAT["done"]}'

@@ -30,11 +30,6 @@ async def parsing_semd(doc: "Meddoc") -> "Case":
     if req.status_code != 200:
         raise NetricaError("проблема с подключением\n" + URL)
 
-    try:
-        req.json()["entry"][0]["resource"]["content"]
-    except KeyError:
-        raise NoCDAfiles("Нет прикрепленных файлов!")
-
     DICT = {}
     # разбираем прикрепленные файлы и ищем cda
     for file in req.json()["entry"][0]["resource"]["content"]:
@@ -46,12 +41,15 @@ async def parsing_semd(doc: "Meddoc") -> "Case":
         soup = BeautifulSoup(b64decode(data), "xml")
         try:
             DICT = analis_cda(soup)
-        except Exception as e:
-            print(str(e))
+        except Exception:
             continue
+        else:
+            if len(DICT):
+                break
 
-    if DICT == {}:
+    if len(DICT) == 0:
         raise NoCDAfiles("не удалось проанализировать файлы")
+
     # === анализируем, что удалось вытащить из файла
     cont = await get_case_content(DICT)
     # добавляем в док анализ контента

@@ -15,7 +15,7 @@ class Case(db.Model):
     di_id = db.Column(db.Integer, db.ForeignKey("diagnoz.id"))
 
     # дата заболевания
-    date_sicness = db.Column(db.Date, nullable=True)
+    date_sickness = db.Column(db.Date, nullable=True)
     # дата первого обращения
     date_first_req = db.Column(db.Date, nullable=True)
     # дата отправки заявки в СЕС
@@ -26,7 +26,7 @@ class Case(db.Model):
     # тип госпитализации
     hospitalization = db.Column(db.SmallInteger, nullable=True)
     # проведенные анти-эпидемиологические меры
-    anti_epidemic_measures = db.Column(db.String, nullable=True)
+    measures = db.Column(db.String, nullable=True)
     # лабораторное потверждение
     lab_confirm = db.Column(db.Boolean)
 

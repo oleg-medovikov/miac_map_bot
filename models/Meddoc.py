@@ -22,7 +22,7 @@ class Meddoc(db.Model):
     # обработка документа reading
     r_id = db.Column(db.Integer, db.ForeignKey("reading.id"), nullable=True)
     # результат прочтения - случай case
-    c_id = db.Column(db.Integer, db.ForeignKey("case.id"), nullable=True)
+    c_id = db.Column(db.Integer, db.ForeignKey("cases.id"), nullable=True)
     # наполнение контентом - что нашлось в сэмде
     cc_id = db.Column(db.Integer, db.ForeignKey("case_content.id"), nullable=True)
 
@@ -52,11 +52,11 @@ class Meddoc(db.Model):
 
     @property
     def case(self):
-        return self._case
+        return self._cases
 
     @case.setter
     def case(self, value):
-        self._case = value
+        self._cases = value
 
     @property
     def content(self):

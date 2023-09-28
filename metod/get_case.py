@@ -18,7 +18,7 @@ async def get_case(
         "a_id": adress.id,
         "w_id": None if work is None else work.id,
         "di_id": diagnoz.id,
-        "date_sicness": DICT.get("date_sickness"),
+        "date_sickness": DICT.get("date_sickness"),
         "date_first_req": DICT.get("date_first_req"),
         "time_SES": DICT.get("time_SES"),
         "date_diagnoz": DICT.get("date_diagnoz"),

@@ -5,6 +5,7 @@ from .exceptions import (
     NoFindMKB,
     NoFindReg,
     TokenYandexExceed,
+    NotCDAfile,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "NoFindMKB",
     "NoFindReg",
     "TokenYandexExceed",
+    "NotCDAfile",
 ]

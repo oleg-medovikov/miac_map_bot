@@ -1,7 +1,7 @@
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram import md
-from sqlalchemy import and_, null
+from sqlalchemy import null
 
 
 from .dispetcher import dp
@@ -15,9 +15,7 @@ async def download_all_semd(message: Message):
     if not check:
         return
 
-    DOCS = await Meddoc.query.where(
-        and_(Meddoc.c_id == null(), Meddoc.r_id == null())
-    ).gino.all()
+    DOCS = await Meddoc.query.where(Meddoc.c_id == null()).gino.all()
 
     MESS = f"Всего не загруженных семдов на данный момент: {len(DOCS)}"
 

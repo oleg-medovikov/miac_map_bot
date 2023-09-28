@@ -29,7 +29,7 @@ async def get_case_content(DICT: dict) -> "CaseContent":
         "MKB": "MKB" in KEYS,
         "lab_confirm": "lab_confirm" in KEYS,
     }
-
+    print(TEST)
     content = await CaseContent.query.where(
         and_(*[getattr(CaseContent, key) == value for key, value in TEST.items()])
     ).gino.first()

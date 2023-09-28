@@ -1,7 +1,6 @@
 from .get_chat_fio import get_chat_fio
 from .delete_message import delete_message
 from .return_year import return_year
-from .geocoder import geocoder
 from .write_styling_excel import write_styling_excel
 from .get_meddoc_numbers import get_meddoc_numbers
 from .get_one_meddoc import get_one_meddoc
@@ -14,7 +13,6 @@ __all__ = [
     "check_user",
     "delete_message",
     "return_year",
-    "geocoder",
     "get_meddoc_numbers",
     "get_one_meddoc",
     "write_styling_excel",

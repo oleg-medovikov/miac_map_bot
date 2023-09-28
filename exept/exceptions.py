@@ -20,3 +20,7 @@ class NoFindMKB(Exception):
 
 class NoFindReg(Exception):
     pass
+
+
+class NotCDAfile(Exception):
+    pass

@@ -96,26 +96,26 @@ def analis_cda(soup: BeautifulSoup) -> dict:
 
     # ==== разбираем даты ==========
     # отдельный способ разбирать даты
-    for date in soup.find_all("effectiveTime"):
-        parents = date.find_previous_siblings()
+    for date_ in soup.find_all("effectiveTime"):
+        parents = date_.find_previous_siblings()
         for parent in parents:
             codeSystem = parent.get("codeSystem")
             code = parent.get("code")
             # ====== Дата заболевания ==========
             if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12144":
-                DICT["date_sickness"] = return_attr(date, "value")
+                DICT["date_sickness"] = return_attr(date_, "value")
                 continue
             # ==== Дата первичного обращения (выявления) ===
             if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12145":
-                DICT["date_first_req"] = return_attr(date, "value")
+                DICT["date_first_req"] = return_attr(date_, "value")
                 continue
             # Дата и час первичной сигнализации в СЭС
             if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "12149":
-                DICT["time_SES"] = return_attr(date, "value")
+                DICT["time_SES"] = return_attr(date_, "value")
                 continue
             # Диагноз
             if codeSystem == "1.2.643.5.1.13.13.99.2.166" and code == "838":
-                DICT["date_diagnoz"] = return_attr(date, "value")
+                DICT["date_diagnoz"] = return_attr(date_, "value")
                 continue
 
     # ====== Разбираем показатели
@@ -151,6 +151,10 @@ def analis_cda(soup: BeautifulSoup) -> dict:
             codeSystem_ = obs.find("value").get("codeSystem")
             if codeSystem_ == "1.2.643.5.1.13.13.11.1007":
                 DICT["hospitalization_type"] = obs.find("value").get("code")
+                if DICT["hospitalization_type"].isdigit():
+                    DICT["hospitalization_type"] = int(DICT["hospitalization_type"])
+                else:
+                    DICT["hospitalization_type"] = None
             continue
 
         # Проведенные первичные противоэпидемические мероприятия
@@ -190,10 +194,15 @@ def analis_cda(soup: BeautifulSoup) -> dict:
     date_keys = ["date_sickness", "date_first_req", "time_SES", "date_diagnoz"]
     for key in date_keys:
         if not isinstance(DICT.get(key), date):
-            DICT.pop(key)
+            if key in DICT:
+                DICT.pop(key)
 
-    for key, value in DICT.items():
-        if value == "":
-            DICT.pop(key)
+    list_ = []
+    for key in DICT.keys():
+        if DICT[key] == "":
+            list_.append(key)
+
+    for key in list_:
+        DICT.pop(key)
 
     return DICT
