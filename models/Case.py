@@ -2,7 +2,7 @@ from base import db
 
 
 class Case(db.Model):
-    __tablename__ = "case"
+    __tablename__ = "cases"
 
     id = db.Column(db.Integer, primary_key=True)
     # идентификатор врача

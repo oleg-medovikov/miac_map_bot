@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, date
 
 
 def return_attr(some_dict, attr):
@@ -186,6 +186,11 @@ def analis_cda(soup: BeautifulSoup) -> dict:
             else:
                 DICT["lab_confirm"] = False
             continue
+
+    date_keys = ["date_sickness", "date_first_req", "time_SES", "date_diagnoz"]
+    for key in date_keys:
+        if not isinstance(DICT.get(key), date):
+            DICT.pop(key)
 
     for key, value in DICT.items():
         if value == "":
