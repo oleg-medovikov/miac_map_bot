@@ -3,11 +3,14 @@ from aiogram import md
 from sqlalchemy import and_, false, true
 from datetime import datetime
 
-from models import MeddocError, Reading
+
+from models import Reading
+from metod import add_error, delete_error
 from exept import (
     NoTokenYandex,
     NetricaError,
     NoCDAfiles,
+    CDAisEmpty,
     NoFindReg,
     NoFindMKB,
     TokenYandexExceed,
@@ -65,25 +68,30 @@ async def start_download_semd(DOCS: list):
             continue
         except NoCDAfiles:
             # нулевая ошибка обработки, нет файла
-            await MeddocError.create(m_id=doc.id, e_id=0)
+            await add_error(doc.id, 0)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
             print("нет файлов CDA")
             continue
         except NoFindReg:
             # Не найден адрес регистрации
-            await MeddocError.create(m_id=doc.id, e_id=1)
+            await add_error(doc.id, 1)
             await doc.update(r_id=read_false.id).apply()
             print("не найден адрес регистрации")
             STAT["error"] += 1
             continue
         except NoFindMKB:
             # не найден диагноз!
-            await MeddocError.create(m_id=doc.id, e_id=2)
+            await add_error(doc.id, 2)
             await doc.update(r_id=read_false.id).apply()
             print("не найден мкб")
             STAT["error"] += 1
             continue
+        except CDAisEmpty:
+            # просто пустой файл
+            await add_error(doc.id, 3)
+            await doc.update(r_id=read_false.id).apply()
+            STAT["error"] += 1
 
         except Exception as e:
             STAT["error"] += 1
@@ -95,6 +103,7 @@ async def start_download_semd(DOCS: list):
             )
             break
         else:
+            await delete_error(doc.id)
             await doc.update(r_id=read_true.id, c_id=case.id).apply()
             STAT["done"] += 1
 

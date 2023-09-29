@@ -1,4 +1,4 @@
-from sqlalchemy import false, and_
+from sqlalchemy import null
 from aiogram import md
 
 from models import Meddoc
@@ -8,9 +8,7 @@ from func import start_download_semd
 
 
 async def download_semds_automatic():
-    DOCS = await Meddoc.query.where(
-        and_(Meddoc.processed == false(), Meddoc.error == false())
-    ).gino.all()
+    DOCS = await Meddoc.query.where(Meddoc.c_id == null()).gino.all()
 
     MESS = f"Всего не загруженных семдов на данный момент: {len(DOCS)}"
 

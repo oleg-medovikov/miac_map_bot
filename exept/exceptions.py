@@ -24,3 +24,7 @@ class NoFindReg(Exception):
 
 class NotCDAfile(Exception):
     pass
+
+
+class CDAisEmpty(Exception):
+    pass

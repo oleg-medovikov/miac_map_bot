@@ -1,10 +1,8 @@
-import requests
 from base64 import b64decode
 from bs4 import BeautifulSoup
 
 from models import Meddoc, Case
-from exept import NetricaError, NoCDAfiles
-from conf import settings
+from exept import CDAisEmpty, NoCDAfiles
 from metod import (
     get_case,
     get_case_content,
@@ -12,6 +10,7 @@ from metod import (
     get_adress,
     get_work,
     get_diagnoz,
+    get_request,
 )
 
 from .analis_cda import analis_cda
@@ -19,20 +18,11 @@ from .analis_cda import analis_cda
 
 async def parsing_semd(doc: "Meddoc") -> "Case":
     "скачиваем и записваем в базу результат анализа"
-    URL = (
-        settings.REGIZ_URL_2
-        + str(doc.meddoc_biz_key)
-        + "?mimeTypeOriginal=true&_format=json&IsIgnoreFHIRcode=true"
-    )
-    HEADER = dict(Authorization=settings.REGIZ_AUTH)
 
-    req = requests.get(URL, headers=HEADER)
-    if req.status_code != 200:
-        raise NetricaError("проблема с подключением\n" + URL)
-
+    JSON = await get_request(doc)
     DICT = {}
     # разбираем прикрепленные файлы и ищем cda
-    for file in req.json()["entry"][0]["resource"]["content"]:
+    for file in JSON["entry"][0]["resource"]["content"]:
         if file["attachment"]["contentType"] != "text/xml":
             continue
 
@@ -49,6 +39,8 @@ async def parsing_semd(doc: "Meddoc") -> "Case":
 
     if len(DICT) == 0:
         raise NoCDAfiles("не удалось проанализировать файлы")
+    if len(DICT) < 8:
+        raise CDAisEmpty("Пустой файл")
 
     # === анализируем, что удалось вытащить из файла
     cont = await get_case_content(DICT)
