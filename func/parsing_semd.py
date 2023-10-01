@@ -21,6 +21,11 @@ async def parsing_semd(doc: "Meddoc") -> "Case":
 
     JSON = await get_request(doc)
     DICT = {}
+    try:
+        JSON["entry"][0]["resource"]["content"]
+    except KeyError:
+        raise NoCDAfiles("нет файлов")
+
     # разбираем прикрепленные файлы и ищем cda
     for file in JSON["entry"][0]["resource"]["content"]:
         if file["attachment"]["contentType"] != "text/xml":

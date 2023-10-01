@@ -1,4 +1,3 @@
-from asyncpg.exceptions import UniqueViolationError
 from aiogram import md
 from sqlalchemy import and_, false, true
 from datetime import datetime
@@ -92,16 +91,6 @@ async def start_download_semd(DOCS: list):
             await add_error(doc.id, 3)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
-
-        except Exception as e:
-            STAT["error"] += 1
-            await bot.send_message(
-                settings.MASTER,
-                md.quote(str(e) + f"\n {doc.meddoc_biz_key}"),
-                disable_notification=True,
-                parse_mode="MarkdownV2",
-            )
-            break
         else:
             await delete_error(doc.id)
             await doc.update(r_id=read_true.id, c_id=case.id).apply()
