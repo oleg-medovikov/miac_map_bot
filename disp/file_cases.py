@@ -10,10 +10,11 @@ from func import check_user
 
 @dp.message(Command("file_cases"))
 async def file_cases(message: Message):
-    if not await check_user(message, "user"):
+    check, user = await check_user(message, "user")
+    if not check:
         return
 
-    await UserLog.create(u_id=message.chat.id, action=10)
+    await UserLog.create(u_id=user.id, a_id=0)
 
     # === Джойним вещи и вытаскиваем ===
     results = await Case.join(Adress).select().gino.all()
