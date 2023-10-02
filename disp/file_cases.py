@@ -6,7 +6,7 @@ from aiogram.types.input_file import BufferedInputFile
 from .dispetcher import dp
 from base import db
 from models import UserLog, Meddoc, Patient, Org, Case, Adress, Doctor, Diagnoz
-from func import check_user
+from func import check_user, write_styling_excel
 
 
 @dp.message(Command("file_cases"))
@@ -72,9 +72,8 @@ async def file_cases(message: Message):
 
     FILEPATH = "/tmp/Экстренные извещения.xlsx"
     FILENAME = "Экстренные извещения.xlsx"
-    # SHETNAME = "def"
-    # write_styling_excel(FILENAME, df, SHETNAME)
-    df.to_excel(FILEPATH, index=False)
+    SHETNAME = "def"
+    write_styling_excel(FILEPATH, df, SHETNAME)
 
     file = BufferedInputFile(open(FILEPATH, "rb").read(), FILENAME)
     return await message.answer_document(file)
