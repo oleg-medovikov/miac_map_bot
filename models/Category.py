@@ -8,4 +8,4 @@ class Category(db.Model):
     color = db.Column(db.ARRAY(db.Float))
     mkb = db.Column(db.ARRAY(db.String))
     demaind = db.Column(db.JSON)
-    active = db.Column(db.Bolean)
+    active = db.Column(db.Boolean)

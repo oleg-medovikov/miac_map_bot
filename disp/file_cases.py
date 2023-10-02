@@ -4,7 +4,8 @@ from pandas import DataFrame
 from aiogram.types.input_file import BufferedInputFile
 
 from .dispetcher import dp
-from models import UserLog, Case, Adress
+from base import db
+from models import UserLog, Meddoc, Patient, Org, Case, Adress, Doctor, Diagnoz
 from func import check_user
 
 
@@ -14,12 +15,60 @@ async def file_cases(message: Message):
     if not check:
         return
 
-    await UserLog.create(u_id=user.id, a_id=0)
+    await UserLog.create(u_id=user.id, a_id=31)
 
     # === Джойним вещи и вытаскиваем ===
-    results = await Case.join(Adress).select().gino.all()
+    DATA = (
+        await db.select(
+            [
+                Org.short_name,
+                Meddoc.history_number,
+                Meddoc.creation_date,
+                Patient.sex,
+                Patient.birthdate,
+                Patient.birthdate_baby,
+                Doctor.fio,
+                Doctor.spec,
+                Doctor.telefon,
+                Case.date_sickness,
+                Case.date_first_req,
+                Case.date_diagnoz,
+                Case.time_SES,
+                Diagnoz.MKB,
+                Diagnoz.diagnoz,
+                Adress.text,
+                Adress.point,
+            ]
+        )
+        .select_from(
+            Meddoc.outerjoin(Patient)
+            .outerjoin(Org)
+            .join(Case.outerjoin(Doctor).outerjoin(Adress).outerjoin(Diagnoz))
+        )
+        .gino.all()
+    )
 
-    df = DataFrame([_.to_dict() for _ in results])
+    COLUMNS = [
+        "Организация",
+        "номер истории",
+        "дата отправки",
+        "Пол",
+        "Дата рождения",
+        "Дата рождения ребенка",
+        "ФИО врача",
+        "Специальность",
+        "Телефон",
+        "Дата заболевания",
+        "Дата первого обращения",
+        "Дата диагноза",
+        "Дата отправки в СЕС",
+        "МКБ",
+        "Диагноз",
+        "Адрес регистрации",
+        "координаты",
+    ]
+
+    df = DataFrame(data=DATA, columns=COLUMNS)
 
     FILEPATH = "/tmp/Экстренные извещения.xlsx"
     FILENAME = "Экстренные извещения.xlsx"

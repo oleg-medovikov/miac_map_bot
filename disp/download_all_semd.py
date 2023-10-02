@@ -25,7 +25,6 @@ async def download_all_semd(message: Message):
     )
 
     MESS = f"Всего не загруженных семдов на данный момент: {len(DOCS)}"
-    MESS += f"{DOCS[0]}"
 
     await UserLog.create(u_id=user.id, a_id=13)
     await message.answer(
