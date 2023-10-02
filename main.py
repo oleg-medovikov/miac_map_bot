@@ -9,7 +9,7 @@
 import asyncio
 
 from base import db
-from disp import dp, bot
+from disp import dp, bot, set_default_commands
 from conf import settings
 from shed import create_scheduler
 
@@ -19,6 +19,7 @@ async def on_startup():
     scheduler.start()
     await db.set_bind(settings.DATABASE_URL)
     # await db.gino.create_all()
+    await set_default_commands(bot)
     await dp.start_polling(bot)
 
 
