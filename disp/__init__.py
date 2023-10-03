@@ -8,6 +8,7 @@ from .download_all_semd import download_all_semd
 from .file_cases import file_cases
 from .get_one_case import get_one_case
 from .null_history_number import null_history_number
+from .file_users import file_users
 
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "download_all_semd",
     "analitic_panel",
     "file_cases",
+    "file_users",
     "get_one_case",
     "null_history_number",
 ]
