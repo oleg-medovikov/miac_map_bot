@@ -9,6 +9,7 @@ from .file_cases import file_cases
 from .get_one_case import get_one_case
 from .null_history_number import null_history_number
 from .file_users import file_users
+from .file_category import file_category
 
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "analitic_panel",
     "file_cases",
     "file_users",
+    "file_category",
     "get_one_case",
     "null_history_number",
 ]
