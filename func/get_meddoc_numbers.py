@@ -1,13 +1,10 @@
 import requests
-from uuid import UUID
-from asyncpg.exceptions import UniqueViolationError
-from sqlalchemy import and_
-from datetime import date
+from datetime import datetime, date, timedelta
 
 
 from conf import settings
-from models import Org, Meddoc, Patient
-from .parse_date import parse_date
+from metod import get_org, get_patient, parsing_date
+from models import Meddoc
 
 
 async def get_meddoc_numbers(START: date, STOP: date) -> str:
@@ -28,52 +25,41 @@ async def get_meddoc_numbers(START: date, STOP: date) -> str:
     DICT = {"all": 0, "good": 0, "bad": 0, "org": 0}
     for _ in req.json():
         DICT["all"] += 1
-        # первым делом нужно получить id организации
-        org = await Org.query.where(
-            Org.case_level1_key == UUID(_.get("case_organization_level1_key"))
+        meddoc = await Meddoc.query.where(
+            Meddoc.meddoc_biz_key == int(_.get("meddoc_biz_key"))
         ).gino.first()
-        if org is None:
-            org = await Org.create(
-                case_level1_key=UUID(_.get("case_organization_level1_key")),
-                short_name=_.get("case_organization_level1_short_name"),
-            )
-            DICT["org"] += 1
-        # теперь формируем пациента
-        patient = await Patient.query.where(
-            and_(
-                Patient.global_id == UUID(_.get("case_patient_global_key")),
-                Patient.birthdate_baby
-                == parse_date(_.get("birthcertificate_birthdate")),
-            )
-        ).gino.first()
-        if patient is None:
-            patient = await Patient.create(
-                global_id=UUID(_.get("case_patient_global_key")),
-                sex=True if _.get("case_patient_gender") == "male" else False,
-                birthdate=parse_date(_.get("case_patient_birthdate")),
-                birthdate_baby=parse_date(_.get("birthcertificate_birthdate")),
-            )
-
-        # теперь пробуем создать меддок
-        try:
-            await Meddoc.create(
-                meddoc_biz_key=int(_.get("meddoc_biz_key")),
-                org_id=org.id,
-                p_id=patient.id,
-                history_number=_.get("case_history_number"),
-                creation_date=parse_date(_.get("md_date")),
-                success_date=parse_date(_.get("success_date")),
-                doc_type_code=int(_.get("meddoc_meddocumenttype_code")),
-            )
-        except UniqueViolationError:
+        if meddoc is not None:
             # уже существует такой бизкей
             DICT["bad"] += 1
-        else:
-            DICT["good"] += 1
+            continue
+
+        # первым делом нужно получить id организации
+        org = await get_org(_)
+        # теперь формируем пациента
+        patient = await get_patient(_)
+        # теперь пробуем создать меддок
+
+        creation_date = parsing_date(_.get("md_date"))
+
+        await Meddoc.create(
+            meddoc_biz_key=int(_.get("meddoc_biz_key")),
+            org_id=org.id,
+            p_id=patient.id,
+            history_number=_.get("case_history_number"),
+            creation_date=creation_date,
+            success_date=parsing_date(_.get("success_date")),
+            doc_type_code=int(_.get("meddoc_meddocumenttype_code")),
+            age=(
+                (
+                    datetime.combine(creation_date, datetime.min.time())
+                    - datetime.combine(patient.birthdate, datetime.min.time())
+                )
+                // timedelta(days=365.2425)
+            ),
+        )
+        DICT["good"] += 1
 
     return f"""Всего обработано номеров: {DICT['all']}
     из них новых: {DICT['good']}
     из них уже были в базе: {DICT['bad']}
-
-    Новых организаций: {DICT['org']}
     """

@@ -5,5 +5,6 @@ class Diagnoz(db.Model):
     __tablename__ = "diagnoz"
 
     id = db.Column(db.Integer, primary_key=True)
-    MKB = db.Column(db.String(10))
+    mkb = db.Column(db.String(10))
+    mkb3 = db.Column(db.String(3))
     diagnoz = db.Column(db.String())

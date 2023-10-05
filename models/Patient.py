@@ -11,5 +11,8 @@ class Patient(db.Model):
     sex = db.Column(db.Boolean)
     # дата рождения
     birthdate = db.Column(db.Date)
+    # расчетный возраст на момент диагноза
+    # полных лет
+    # age = db.Column(db.SmallInteger)
     # дата рождения ребенка, если есть
     birthdate_baby = db.Column(db.Date, nullable=True)

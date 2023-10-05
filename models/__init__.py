@@ -3,6 +3,7 @@ from .UserLog import UserLog
 from .UserAction import UserAction
 from .Meddoc import Meddoc
 from .MeddocError import MeddocError
+from .MeddocCategory import MeddocCategory
 from .Category import Category
 from .Patient import Patient
 from .Org import Org
@@ -22,6 +23,7 @@ __all__ = [
     "UserAction",
     "Meddoc",
     "MeddocError",
+    "MeddocCategory",
     "Category",
     "Patient",
     "Org",

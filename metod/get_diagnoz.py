@@ -20,12 +20,14 @@ async def get_diagnoz(DICT: dict) -> "Diagnoz":
 
     diagnoz = await Diagnoz.query.where(
         and_(
-            Diagnoz.MKB == DICT.get("MKB"),
+            Diagnoz.mkb == DICT.get("MKB"),
             Diagnoz.diagnoz == DICT.get("diagnoz"),
         )
     ).gino.first()
 
     if diagnoz is None:
-        diagnoz = await Diagnoz.create(MKB=DICT.get("MKB"), diagnoz=DICT.get("diagnoz"))
+        diagnoz = await Diagnoz.create(
+            mkb=DICT["MKB"], mkb3=DICT["MKB"][0:3], diagnoz=DICT.get("diagnoz")
+        )
 
     return diagnoz

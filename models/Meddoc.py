@@ -18,6 +18,8 @@ class Meddoc(db.Model):
     success_date = db.Column(db.Date)
     # численный идентификатор сэмда
     doc_type_code = db.Column(db.SmallInteger)
+    # расчетный возраст на момент извещения
+    age = db.Column(db.SmallInteger)
 
     # обработка документа reading
     r_id = db.Column(db.Integer, db.ForeignKey("reading.id"), nullable=True)

@@ -34,7 +34,7 @@ async def file_cases(message: Message):
                 Case.date_first_req,
                 Case.date_diagnoz,
                 Case.time_SES,
-                Diagnoz.MKB,
+                Diagnoz.mkb,
                 Diagnoz.diagnoz,
                 Adress.text,
                 Adress.point,

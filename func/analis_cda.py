@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from datetime import datetime, date
+from re import search
 
 
 def return_attr(some_dict, attr):
@@ -190,6 +191,12 @@ def analis_cda(soup: BeautifulSoup) -> dict:
             else:
                 DICT["lab_confirm"] = False
             continue
+
+    if DICT.get("MKB") is None:
+        try:
+            DICT["MKB"] = search("\w\d{2}\.\d+", soup.text).group(0)
+        except AttributeError:
+            pass
 
     date_keys = ["date_sickness", "date_first_req", "time_SES", "date_diagnoz"]
     for key in date_keys:

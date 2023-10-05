@@ -7,6 +7,7 @@ class Category(db.Model):
     name = db.Column(db.String)
     short = db.Column(db.String)
     color = db.Column(db.ARRAY(db.Float))
+    mkb3 = db.Column(db.ARRAY(db.String))
     mkb = db.Column(db.ARRAY(db.String))
     demaind = db.Column(db.JSON)
     active = db.Column(db.Boolean)

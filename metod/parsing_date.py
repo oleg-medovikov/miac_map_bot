@@ -2,8 +2,8 @@ from datetime import datetime, date
 from typing import Optional
 
 
-def parse_date(string: str) -> Optional["date"]:
-    if string == "":
+def parsing_date(string: Optional[str]) -> Optional["date"]:
+    if string in ("", None):
         return None
 
     if len(string) == 8 and string.isdigit():
