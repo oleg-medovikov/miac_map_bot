@@ -12,6 +12,7 @@ from exept import (
     CDAisEmpty,
     NoFindReg,
     NoFindMKB,
+    NoCorrectMKB,
     TokenYandexExceed,
 )
 from .parsing_semd import parsing_semd
@@ -63,27 +64,34 @@ async def start_download_semd(DOCS: list):
         except NetricaError:
             STAT["skip"] += 1
             await doc.update(r_id=read_false.id).apply()
-            print("ошибка нетрики")
+            print(doc.meddoc_biz_key, "ошибка нетрики")
             continue
         except NoCDAfiles:
             # нулевая ошибка обработки, нет файла
             await add_error(doc.id, 0)
             await doc.update(r_id=read_false.id).apply()
             STAT["error"] += 1
-            print("нет файлов CDA")
+            print(doc.meddoc_biz_key, "нет файлов CDA")
             continue
         except NoFindReg:
             # Не найден адрес регистрации
             await add_error(doc.id, 1)
             await doc.update(r_id=read_false.id).apply()
-            print("не найден адрес регистрации")
+            print(doc.meddoc_biz_key, "не найден адрес регистрации")
             STAT["error"] += 1
             continue
         except NoFindMKB:
             # не найден диагноз!
             await add_error(doc.id, 2)
             await doc.update(r_id=read_false.id).apply()
-            print("не найден мкб")
+            print(doc.meddoc_biz_key, "не найден мкб")
+            STAT["error"] += 1
+            continue
+        except NoCorrectMKB:
+            # не найден диагноз!
+            await add_error(doc.id, 4)
+            await doc.update(r_id=read_false.id).apply()
+            print(doc.meddoc_biz_key, "некорректный мкб")
             STAT["error"] += 1
             continue
         except CDAisEmpty:

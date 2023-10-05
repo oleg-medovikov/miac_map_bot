@@ -7,6 +7,7 @@ from .exceptions import (
     TokenYandexExceed,
     NotCDAfile,
     CDAisEmpty,
+    NoCorrectMKB,
 )
 
 __all__ = [
@@ -14,6 +15,7 @@ __all__ = [
     "NetricaError",
     "NoCDAfiles",
     "NoFindMKB",
+    "NoCorrectMKB",
     "NoFindReg",
     "TokenYandexExceed",
     "NotCDAfile",

@@ -18,6 +18,10 @@ class NoFindMKB(Exception):
     pass
 
 
+class NoCorrectMKB(Exception):
+    pass
+
+
 class NoFindReg(Exception):
     pass
 
