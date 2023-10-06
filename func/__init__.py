@@ -6,6 +6,7 @@ from .get_meddoc_numbers import get_meddoc_numbers
 from .get_one_meddoc import get_one_meddoc
 from .check_user import check_user
 from .start_download_semd import start_download_semd
+from .sort_category import sort_category
 
 __all__ = [
     "get_chat_fio",
@@ -16,4 +17,5 @@ __all__ = [
     "get_one_meddoc",
     "write_styling_excel",
     "start_download_semd",
+    "sort_category",
 ]
