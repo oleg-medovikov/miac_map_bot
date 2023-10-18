@@ -4,10 +4,10 @@ from models import Category, Meddoc, Patient, Case, Diagnoz
 from metod import add_meddoc_category
 
 
-async def sort_category() -> None:
+async def sort_meddoc_category() -> None:
     """прогоняем меддоки на соответсвие категориям заболеваний"""
 
-    for category in await Category.query.guno.all():
+    for category in await Category.query.gino.all():
         # первым делом вытаскиваем id всех подходящих диагнозов для категории
         query = (
             await Diagnoz.select("id")
@@ -19,8 +19,8 @@ async def sort_category() -> None:
         # выбираем те меддокументы, где есть случаи с нужными диагнозами
         query = Meddoc.load(patient=Patient, case=Case).where(Case.di_id.in_(DIAGNOZIS))
         # проверка на пол
-        if "sex" in category.demind:
-            query = query.where(Patient.sex == category.demind["sex"])
+        if "sex" in category.demaind:
+            query = query.where(Patient.sex == category.demaind["sex"])
         # проверка на максимальный возраст
         if "age_end" in category.demaind:
             query = query.where(Meddoc.age < category.demaind["age_end"])

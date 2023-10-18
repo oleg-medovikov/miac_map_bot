@@ -11,6 +11,7 @@ from .null_history_number import null_history_number
 from .file_users import file_users
 from .file_category import file_category
 from .put_down_the_age import put_down_the_age
+from .sort_category import sort_category
 
 
 __all__ = [
@@ -29,4 +30,5 @@ __all__ = [
     "get_one_case",
     "null_history_number",
     "put_down_the_age",
+    "sort_category",
 ]

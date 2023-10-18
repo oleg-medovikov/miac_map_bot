@@ -8,7 +8,7 @@ from conf import settings
 def get_one_meddoc() -> str:
     "выгружаем одну историю болезни для примера"
 
-    START = (datetime.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+    START = (datetime.today() - timedelta(days=3)).strftime("%Y-%m-%d")
     STOP = datetime.today().strftime("%Y-%m-%d")
     URL = (
         settings.REGIZ_URL

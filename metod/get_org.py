@@ -9,7 +9,7 @@ async def get_org(DICT: dict) -> "Org":
 
     TEST = {
         "case_level1_key": UUID(DICT.get("case_organization_level1_key")),
-        "short_name": DICT.get("short_name"),
+        "short_name": DICT.get("case_organization_level1_short_name"),
     }
     org = await Org.query.where(
         and_(*[getattr(Org, key) == value for key, value in TEST.items()])
