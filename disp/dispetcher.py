@@ -17,6 +17,7 @@ dp = Dispatcher(storage=MemoryStorage())
 async def set_default_commands(bot):
     DICT = {
         "/start": "Приветсвие",
+        "/return_map_events": "Посмотреть карту со случаями по категории",
         "/analitic_panel": "Команды для анализа базы",
         "/admin_panel": "Команды для редактирования базы",
     }

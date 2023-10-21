@@ -13,6 +13,7 @@ from .file_category import file_category
 from .put_down_the_age import put_down_the_age
 from .sort_category import sort_category
 from .error_org_short_name import error_org_short_name
+from .return_map_events import return_map_events
 
 
 __all__ = [
@@ -33,4 +34,5 @@ __all__ = [
     "put_down_the_age",
     "sort_category",
     "error_org_short_name",
+    "return_map_events",
 ]
