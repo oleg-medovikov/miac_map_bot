@@ -14,6 +14,7 @@ from .put_down_the_age import put_down_the_age
 from .sort_category import sort_category
 from .error_org_short_name import error_org_short_name
 from .return_map_events import return_map_events
+from .file_semd_errors import file_semd_errors
 
 
 __all__ = [
@@ -35,4 +36,5 @@ __all__ = [
     "sort_category",
     "error_org_short_name",
     "return_map_events",
+    "file_semd_errors",
 ]

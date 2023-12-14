@@ -2,7 +2,6 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from pandas import DataFrame
 from aiogram.types.input_file import BufferedInputFile
-from sqlalchemy import null
 
 from .dispetcher import dp
 from base import db
