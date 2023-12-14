@@ -1,9 +1,7 @@
-from logging import error
 from aiogram.types import Message
 from aiogram.filters import Command
 from pandas import DataFrame
 from aiogram.types.input_file import BufferedInputFile
-from sqlalchemy.util import KeyedTuple
 
 from .dispetcher import dp
 from base import db
@@ -17,7 +15,7 @@ async def file_semd_errors(message: Message):
     if not check:
         return
 
-    await UserLog.create(u_id=user.id, a_id=31)
+    await UserLog.create(u_id=user.id, a_id=32)
 
     # === Джойним вещи и вытаскиваем список ===
 
@@ -55,6 +53,33 @@ async def file_semd_errors(message: Message):
         aggfunc="count",
     ).stack(0)
     sv = sv.reset_index()
+    # для сводного отчета вытаскиваем все обработанные семды
+    DATA = (
+        await db.select(
+            [
+                Org.case_level1_key,
+                Org.short_name,
+                db.func.count(Meddoc.meddoc_biz_key),
+                db.func.count(MeddocError.m_id),
+                db.func.min(Meddoc.creation_date),
+            ]
+        )
+        .select_from(Meddoc.outerjoin(Org).outerjoin(MeddocError))
+        .group_by(Org.case_level1_key, Org.short_name)
+        .order_by(Org.short_name)
+        .gino.all()
+    )
+    COLUMNS = [
+        "GUID" "Организация",
+        "Организация",
+        "всего передано",
+        "ошибка при прочтении СЭМДа",
+        "начиная с даты",
+    ]
+    count = DataFrame(data=DATA, columns=COLUMNS)
+
+    sv = count.merge(sv, how="left", on="Организация")
+
     try:
         del sv["level_1"]
     except KeyError:
