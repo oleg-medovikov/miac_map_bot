@@ -7,7 +7,7 @@ from sqlalchemy import null
 from .dispetcher import dp
 from base import db
 from models import UserLog, Meddoc, Org
-from func import check_user
+from func import check_user, write_excel_any_sheets
 
 
 @dp.message(Command("null_history_number"))
@@ -18,36 +18,61 @@ async def null_history_number(message: Message):
 
     await UserLog.create(u_id=user.id, a_id=31)
 
-    # === Джойним вещи и вытаскиваем ===
+    # === Джойним вещи и вытаскиваем список ===
 
     DATA = (
         await db.select(
             [
                 Org.short_name,
-                Meddoc.history_number,
                 Meddoc.creation_date,
                 Meddoc.meddoc_biz_key,
+                Meddoc.history_number,
             ]
         )
         .select_from(Meddoc.outerjoin(Org))
         .where(Meddoc.history_number == "")
+        .order_by(Org.short_name)
         .gino.all()
     )
 
     COLUMNS = [
         "Организация",
-        "номер истории",
         "дата отправки",
         "meddoc_biz_key",
+        "номер истории",
     ]
 
     df = DataFrame(data=DATA, columns=COLUMNS)
 
+    # === Делаем сводный отчет ===
+    DATA = (
+        await db.select(
+            [
+                Org.short_name,
+                db.func.count(Meddoc.meddoc_biz_key),
+            ]
+        )
+        .select_from(Meddoc.outerjoin(Org))
+        .where(Meddoc.history_number == "")
+        .group_by(Org.short_name)
+        .order_by(Org.short_name)
+        .gino.all()
+    )
+    COLUMNS = [
+        "Организация",
+        "количество",
+    ]
+
+    sv = DataFrame(data=DATA, columns=COLUMNS)
+
     FILEPATH = "/tmp/Нет номера истории болезни.xlsx"
     FILENAME = "Нет номера истории болезни.xlsx"
-    # SHETNAME = "def"
-    # write_styling_excel(FILENAME, df, SHETNAME)
-    df.to_excel(FILEPATH, index=False)
+    DICT = {
+        "свод": sv,
+        "список": df,
+    }
+
+    write_excel_any_sheets(FILEPATH, DICT)
 
     file = BufferedInputFile(open(FILEPATH, "rb").read(), FILENAME)
     return await message.answer_document(file)
